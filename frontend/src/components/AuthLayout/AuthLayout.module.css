@@ -1,0 +1,83 @@
+.wrapper {
+  min-height: 100svh;
+  display: flex;
+}
+
+.formSide {
+  flex: 1 1 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #ffffff;
+}
+
+.formCard {
+  width: 100%;
+  max-width: 400px;
+}
+
+.header {
+  text-align: left;
+  margin-bottom: 32px;
+}
+
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.logoMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #bc9150;
+  color: #ffffff;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.brand {
+  margin-bottom: 0 !important;
+  color: #bc9150;
+  letter-spacing: -0.3px;
+}
+
+.title {
+  margin-bottom: 0 !important;
+  font-weight: 400 !important;
+}
+
+.subtitle {
+  margin: 6px 0 0 !important;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.brandSide {
+  flex: 1 1 50%;
+  background: linear-gradient(135deg, #d0c6ac 0%, #bc9150 100%);
+}
+
+@media (max-width: 900px) {
+  .brandSide {
+    display: none;
+  }
+
+  .formSide {
+    padding: 24px 16px;
+  }
+
+  .header {
+    text-align: center;
+  }
+
+  .brandRow {
+    justify-content: center;
+  }
+}

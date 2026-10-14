@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum RolUsuario {
+  DOCENTE
+  ALUMNO
+
+  @@map("rol_usuario")
+}
+
+model Usuario {
+  idUsuario  Int        @id @default(autoincrement()) @map("id_usuario")
+  nombre     String     @map("nombre")
+  apellido   String     @map("apellido")
+  email      String     @unique @map("email")
+  usuario    String     @unique @map("usuario")
+  contrasena String     @map("contrasena")
+  rol        RolUsuario @map("rol")
+
+  docente Docente?
+  alumno  Alumno?
+
+  @@map("usuarios")
+}
+
+model Docente {
+  legajoDocente Int @id @default(autoincrement()) @map("legajo_docente")
+  idUsuario     Int @unique @map("id_usuario")
+
+  usuario       Usuario        @relation(fields: [idUsuario], references: [idUsuario])
+  cursosDocente CursoDocente[]
+
+  @@map("docentes")
+}
+
+model Alumno {
+  legajoAlumno Int @id @default(autoincrement()) @map("legajo_alumno")
+  idUsuario    Int @unique @map("id_usuario")
+
+  usuario      Usuario       @relation(fields: [idUsuario], references: [idUsuario])
+  cursosAlumno CursoAlumno[]
+
+  @@map("alumnos")
+}
+
+model Materia {
+  idMateria Int    @id @default(autoincrement()) @map("id_materia")
+  nombre    String @map("nombre")
+  carrera   String @map("carrera")
+
+  cursos Curso[]
+
+  @@map("materias")
+}
+
+model Curso {
+  idCurso   Int    @id @default(autoincrement()) @map("id_curso")
+  idMateria Int    @map("id_materia")
+  anio      Int    @map("anio")
+  comision  String @map("comision")
+  periodo   String @map("periodo")
+
+  materia       Materia        @relation(fields: [idMateria], references: [idMateria])
+  cursosDocente CursoDocente[]
+  cursosAlumno  CursoAlumno[]
+  horarios      Horario[]
+  asistencias   Asistencia[]
+
+  @@map("cursos")
+}
+
+model CursoDocente {
+  idCursoDocente Int @id @default(autoincrement()) @map("id_curso_docente")
+  idCurso        Int @map("id_curso")
+  legajoDocente  Int @map("legajo_docente")
+
+  curso   Curso   @relation(fields: [idCurso], references: [idCurso])
+  docente Docente @relation(fields: [legajoDocente], references: [legajoDocente])
+
+  @@unique([idCurso, legajoDocente])
+  @@map("curso_docente")
+}
+
+model CursoAlumno {
+  idCursoAlumno Int @id @default(autoincrement()) @map("id_curso_alumno")
+  idCurso       Int @map("id_curso")
+  legajoAlumno  Int @map("legajo_alumno")
+
+  curso       Curso        @relation(fields: [idCurso], references: [idCurso])
+  alumno      Alumno       @relation(fields: [legajoAlumno], references: [legajoAlumno])
+  asistencias Asistencia[]
+
+  @@unique([idCurso, legajoAlumno])
+  @@map("curso_alumno")
+}
+
+model Asistencia {
+  idAsistencia  Int      @id @default(autoincrement()) @map("id_asistencia")
+  idCurso       Int      @map("id_curso")
+  idCursoAlumno Int      @map("id_curso_alumno")
+  fecha         DateTime @db.Date @map("fecha")
+  estado        String   @map("estado")
+
+  curso       Curso       @relation(fields: [idCurso], references: [idCurso])
+  cursoAlumno CursoAlumno @relation(fields: [idCursoAlumno], references: [idCursoAlumno])
+
+  @@map("asistencias")
+}
+
+model Horario {
+  idHorario  Int      @id @default(autoincrement()) @map("id_horario")
+  idCurso    Int      @map("id_curso")
+  dia        String   @map("dia")
+  horaInicio DateTime @db.Time() @map("hora_inicio")
+  horaFin    DateTime @db.Time() @map("hora_fin")
+
+  curso Curso @relation(fields: [idCurso], references: [idCurso])
+
+  @@map("horarios")
+}

@@ -1,10 +1,22 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { ConfigProvider } from 'antd'
+import esES from 'antd/locale/es_ES'
 import './index.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ConfigProvider
+      locale={esES}
+      theme={{
+        token: {
+          colorPrimary: '#bc9150',
+          borderRadius: 8,
+        },
+      }}
+    >
+      <App />
+    </ConfigProvider>
   </StrictMode>,
 )
