@@ -19,6 +19,7 @@ export interface LoginResult {
 export class AuthError extends Error {}
 
 const TOKEN_KEY = 'aulaactiva_token'
+const USER_KEY = 'aulaactiva_user'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:4000',
@@ -36,16 +37,29 @@ export async function login(usuario: string, contrasena: string): Promise<LoginR
   }
 }
 
-export function saveSession(token: string, recordarme: boolean) {
+export function saveSession(token: string, usuario: AuthUser, recordarme: boolean) {
   const storage = recordarme ? localStorage : sessionStorage
   storage.setItem(TOKEN_KEY, token)
+  storage.setItem(USER_KEY, JSON.stringify(usuario))
 }
 
 export function getSession(): string | null {
   return localStorage.getItem(TOKEN_KEY) ?? sessionStorage.getItem(TOKEN_KEY)
 }
 
+export function getSessionUser(): AuthUser | null {
+  const raw = localStorage.getItem(USER_KEY) ?? sessionStorage.getItem(USER_KEY)
+  if (!raw) return null
+  try {
+    return JSON.parse(raw) as AuthUser
+  } catch {
+    return null
+  }
+}
+
 export function clearSession() {
   localStorage.removeItem(TOKEN_KEY)
+  localStorage.removeItem(USER_KEY)
   sessionStorage.removeItem(TOKEN_KEY)
+  sessionStorage.removeItem(USER_KEY)
 }

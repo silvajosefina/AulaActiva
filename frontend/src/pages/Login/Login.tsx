@@ -1,8 +1,10 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Alert, Button, Checkbox, Divider, Form, Input, Radio, Typography, message } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import AuthLayout from '../../components/AuthLayout/AuthLayout'
 import { AuthError, login, saveSession } from '../../services/auth'
+import { ROUTES } from '../../constants/routes'
 import styles from './Login.module.css'
 
 const { Link, Paragraph } = Typography
@@ -20,13 +22,20 @@ function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [messageApi, contextHolder] = message.useMessage()
+  const navigate = useNavigate()
 
   const handleFinish = async (values: LoginFormValues) => {
     setError(null)
     setLoading(true)
     try {
-      const { token } = await login(values.usuario, values.contrasena)
-      saveSession(token, values.recordarme)
+      const { token, usuario } = await login(values.usuario, values.contrasena)
+      saveSession(token, usuario, values.recordarme)
+
+      if (usuario.rol === 'DOCENTE') {
+        navigate(ROUTES.PROFESOR_ASISTENCIA)
+      } else {
+        messageApi.info('La pantalla de Alumno todavía está en construcción.')
+      }
     } catch (err) {
       setError(
         err instanceof AuthError
