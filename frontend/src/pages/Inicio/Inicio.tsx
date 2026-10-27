@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Avatar, Button, Card, Col, Grid, Layout, Row, Tag, Typography, message } from 'antd'
+import { Avatar, Button, Card, Col, Grid, Layout, Row, Tag, Typography } from 'antd'
 import {
   CheckCircleOutlined,
   CheckOutlined,
@@ -92,13 +92,10 @@ const VISTA_PREVIA = [
 function Inicio() {
   const navigate = useNavigate()
   const screens = useBreakpoint()
-  const [messageApi, contextHolder] = message.useMessage()
 
   const irALogin = () => navigate(ROUTES.LOGIN)
 
-  const registrarse = () => {
-    messageApi.info('Esta función estará disponible próximamente.')
-  }
+  const registrarse = () => navigate(ROUTES.REGISTRO)
 
   const irASeccion = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -106,7 +103,6 @@ function Inicio() {
 
   return (
     <Layout className={styles.layout}>
-      {contextHolder}
 
       <Header className={styles.header}>
         <div className={styles.headerInner}>

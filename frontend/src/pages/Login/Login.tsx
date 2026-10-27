@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Alert, Button, Checkbox, Divider, Form, Input, Radio, Typography, message } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import AuthLayout from '../../components/AuthLayout/AuthLayout'
@@ -23,6 +23,8 @@ function Login() {
   const [error, setError] = useState<string | null>(null)
   const [messageApi, contextHolder] = message.useMessage()
   const navigate = useNavigate()
+  const location = useLocation()
+  const recienRegistrado = (location.state as { registrado?: boolean } | null)?.registrado === true
 
   const handleFinish = async (values: LoginFormValues) => {
     setError(null)
@@ -52,7 +54,7 @@ function Login() {
   }
 
   const handleCreateAccount = () => {
-    messageApi.info('Esta función estará disponible próximamente.')
+    navigate(ROUTES.REGISTRO)
   }
 
   return (
@@ -62,10 +64,19 @@ function Login() {
     >
       {contextHolder}
 
+      {recienRegistrado && !error && (
+        <Alert
+          type="success"
+          title="Tu cuenta se creó. Ya podés iniciar sesión."
+          showIcon
+          className={styles.alert}
+        />
+      )}
+
       {error && (
         <Alert
           type="error"
-          message={error}
+          title={error}
           showIcon
           closable
           onClose={() => setError(null)}
