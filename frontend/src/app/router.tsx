@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import Inicio from '../pages/Inicio/Inicio'
 import Login from '../pages/Login/Login'
 import Registro from '../pages/Registro/Registro'
+import RecuperarContrasena from '../pages/RecuperarContrasena/RecuperarContrasena'
 import CargaAsistencia from '../pages/CargaAsistencia'
 import InicioProfesor from '../pages/InicioProfesor'
 import ProtectedRoute from './ProtectedRoute'
@@ -13,6 +14,7 @@ function AppRouter() {
       <Route path={ROUTES.INICIO} element={<Inicio />} />
       <Route path={ROUTES.LOGIN} element={<Login />} />
       <Route path={ROUTES.REGISTRO} element={<Registro />} />
+      <Route path={ROUTES.RECUPERAR_CONTRASENA} element={<RecuperarContrasena />} />
       <Route
         path={ROUTES.PROFESOR_INICIO}
         element={
