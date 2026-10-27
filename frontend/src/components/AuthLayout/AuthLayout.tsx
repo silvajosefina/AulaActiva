@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { Typography } from 'antd'
 import { ScheduleOutlined } from '@ant-design/icons'
 import BrandPanel from './BrandPanel'
+import { ROUTES } from '../../constants/routes'
 import styles from './AuthLayout.module.css'
 
 const { Title, Paragraph } = Typography
@@ -18,14 +20,14 @@ function AuthLayout({ title, subtitle, children }: AuthLayoutProps) {
       <div className={styles.formSide}>
         <div className={styles.formCard}>
           <div className={styles.header}>
-            <div className={styles.brandRow}>
+            <Link to={ROUTES.INICIO} className={styles.brandRow}>
               <span className={styles.logoMark}>
                 <ScheduleOutlined />
               </span>
               <Title level={3} className={styles.brand}>
                 AulaActiva
               </Title>
-            </div>
+            </Link>
             <Title level={5} className={styles.title} type="secondary">
               {title}
             </Title>
