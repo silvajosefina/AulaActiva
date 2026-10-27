@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import Inicio from '../pages/Inicio/Inicio'
 import Login from '../pages/Login/Login'
 import CargaAsistencia from '../pages/CargaAsistencia'
+import InicioProfesor from '../pages/InicioProfesor'
 import ProtectedRoute from './ProtectedRoute'
 import { ROUTES } from '../constants/routes'
 
@@ -10,6 +11,14 @@ function AppRouter() {
     <Routes>
       <Route path={ROUTES.INICIO} element={<Inicio />} />
       <Route path={ROUTES.LOGIN} element={<Login />} />
+      <Route
+        path={ROUTES.PROFESOR_INICIO}
+        element={
+          <ProtectedRoute rolRequerido="DOCENTE">
+            <InicioProfesor />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path={ROUTES.PROFESOR_ASISTENCIA}
         element={

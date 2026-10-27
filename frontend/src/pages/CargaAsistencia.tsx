@@ -354,11 +354,17 @@ export default function CargaAsistencia() {
             selectedKeys={["asistencia"]}
             items={opcionesMenu}
             onClick={({ key }) => {
-              if (key !== "asistencia") {
-                messageApi.info(
-                  "Esta función estará disponible próximamente."
-                );
+              if (key === "inicio") {
+                navigate(ROUTES.PROFESOR_INICIO);
+                return;
               }
+              if (key === "asistencia") {
+                navigate(ROUTES.PROFESOR_ASISTENCIA);
+                return;
+              }
+              
+              // Para 'cursos', 'alumnos', 'materias' u otras:
+              messageApi.info("Esta función estará disponible próximamente.");
             }}
             className="asistencia-menu"
           />
