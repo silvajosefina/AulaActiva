@@ -31,6 +31,7 @@ import {
   CheckCircleFilled,
   CloseCircleOutlined,
   ClockCircleOutlined,
+  InfoCircleOutlined,
   DownOutlined,
   MenuOutlined,
 } from "@ant-design/icons";
@@ -44,7 +45,7 @@ import "./CargaAsistencia.css";
 const { Sider, Header, Content } = Layout;
 const { Title, Text } = Typography;
 
-type EstadoAsistencia = "Presente" | "Ausente" | "Tarde";
+type EstadoAsistencia = "P" | "A" | "T" | "J";
 
 interface Alumno {
   id: number;
@@ -64,9 +65,17 @@ const alumnosIniciales: Alumno[] = [
 ];
 
 const colorEstado: Record<EstadoAsistencia, string> = {
-  Presente: "success",
-  Ausente: "error",
-  Tarde: "warning",
+  P: "success",
+  A: "error",
+  T: "warning",
+  J: "processing",
+};
+
+const textoEstado: Record<EstadoAsistencia, string> = {
+  P: "Presente",
+  A: "Ausente",
+  T: "Tarde",
+  J: "Justificada",
 };
 
 export default function CargaAsistencia() {
@@ -91,17 +100,10 @@ export default function CargaAsistencia() {
     navigate(ROUTES.LOGIN);
   };
 
-  const presentes = alumnos.filter(
-    (a) => a.estado === "Presente"
-  ).length;
-
-  const ausentes = alumnos.filter(
-    (a) => a.estado === "Ausente"
-  ).length;
-
-  const tarde = alumnos.filter(
-    (a) => a.estado === "Tarde"
-  ).length;
+  const presentes = alumnos.filter((a) => a.estado === "P").length;
+  const ausentes = alumnos.filter((a) => a.estado === "A").length;
+  const tarde = alumnos.filter((a) => a.estado === "T").length;
+  const justificadas = alumnos.filter((a) => a.estado === "J").length;
 
   const pendientes = alumnos.filter((a) => !a.estado).length;
 
@@ -196,7 +198,7 @@ export default function CargaAsistencia() {
     {
       title: "ESTADO DE ASISTENCIA",
       key: "estado",
-      width: 440,
+      width: 480,
       render: (_, alumno) => (
         <Radio.Group
           value={alumno.estado}
@@ -207,14 +209,17 @@ export default function CargaAsistencia() {
           buttonStyle="solid"
           className="asistencia-opciones"
         >
-          <Radio.Button value="Presente">
-            <CheckCircleFilled /> Presente
+          <Radio.Button value="P">
+            <CheckCircleFilled /> P
           </Radio.Button>
-          <Radio.Button value="Ausente">
-            <CloseCircleOutlined /> Ausente
+          <Radio.Button value="A">
+            <CloseCircleOutlined /> A
           </Radio.Button>
-          <Radio.Button value="Tarde">
-            <ClockCircleOutlined /> Tarde
+          <Radio.Button value="T">
+            <ClockCircleOutlined /> T
+          </Radio.Button>
+          <Radio.Button value="J">
+            <InfoCircleOutlined /> J
           </Radio.Button>
         </Radio.Group>
       ),
@@ -231,7 +236,7 @@ export default function CargaAsistencia() {
             color={colorEstado[alumno.estado]}
             style={{ borderRadius: 6, padding: "4px 10px" }}
           >
-            {alumno.estado}
+            {textoEstado[alumno.estado]}
           </Tag>
         ) : (
           <Text style={{ color: "#a2a9a3", fontSize: 12 }}>
@@ -472,14 +477,15 @@ export default function CargaAsistencia() {
               </Button>
             </section>
 
-            <div className="asistencia-resumen">
+            {/* RESUMEN DE 5 TARJETAS HORIZONTALES */}
+            <div className="asistencia-resumen" style={{ gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}>
               <div className="asistencia-resumen-item">
                 <div className="asistencia-resumen-icon neutro">
                   <TeamOutlined />
                 </div>
                 <div>
                   <Text type="secondary">Total de alumnos</Text>
-                  <Title level={3}>{alumnos.length}</Title>
+                  <Title level={3} style={{ margin: 0 }}>{alumnos.length}</Title>
                 </div>
               </div>
 
@@ -488,8 +494,8 @@ export default function CargaAsistencia() {
                   <CheckCircleFilled />
                 </div>
                 <div>
-                  <Text type="secondary">Presentes</Text>
-                  <Title level={3} style={{ color: "#39805a" }}>
+                  <Text type="secondary">Presentes (P)</Text>
+                  <Title level={3} style={{ margin: 0, color: "#39805a" }}>
                     {presentes}
                   </Title>
                 </div>
@@ -500,8 +506,8 @@ export default function CargaAsistencia() {
                   <CloseCircleOutlined />
                 </div>
                 <div>
-                  <Text type="secondary">Ausentes</Text>
-                  <Title level={3} style={{ color: "#d75b57" }}>
+                  <Text type="secondary">Ausentes (A)</Text>
+                  <Title level={3} style={{ margin: 0, color: "#d75b57" }}>
                     {ausentes}
                   </Title>
                 </div>
@@ -512,9 +518,21 @@ export default function CargaAsistencia() {
                   <ClockCircleOutlined />
                 </div>
                 <div>
-                  <Text type="secondary">Llegadas tarde</Text>
-                  <Title level={3} style={{ color: "#c48a28" }}>
+                  <Text type="secondary">Llegadas tarde (T)</Text>
+                  <Title level={3} style={{ margin: 0, color: "#c48a28" }}>
                     {tarde}
+                  </Title>
+                </div>
+              </div>
+
+              <div className="asistencia-resumen-item">
+                <div className="asistencia-resumen-icon azul" style={{ color: "#1677ff", background: "#e6f4ff" }}>
+                  <InfoCircleOutlined />
+                </div>
+                <div>
+                  <Text type="secondary">Justificadas (J)</Text>
+                  <Title level={3} style={{ margin: 0, color: "#1677ff" }}>
+                    {justificadas}
                   </Title>
                 </div>
               </div>
@@ -545,16 +563,20 @@ export default function CargaAsistencia() {
                     menu={{
                       items: [
                         {
-                          key: "Presente",
-                          label: "Todos presentes",
+                          key: "P",
+                          label: "Todos Presentes (P)",
                         },
                         {
-                          key: "Ausente",
-                          label: "Todos ausentes",
+                          key: "A",
+                          label: "Todos Ausentes (A)",
                         },
                         {
-                          key: "Tarde",
-                          label: "Todos tarde",
+                          key: "T",
+                          label: "Todos Tarde (T)",
+                        },
+                        {
+                          key: "J",
+                          label: "Todos Justificados (J)",
                         },
                       ],
                       onClick: ({ key }) =>
