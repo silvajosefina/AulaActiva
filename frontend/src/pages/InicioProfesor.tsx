@@ -251,6 +251,10 @@ export default function InicioProfesor() {
                 navigate(ROUTES.PROFESOR_ASISTENCIA);
                 return;
               }
+              if (key === "cursos") {
+                navigate(ROUTES.PROFESOR_CURSOS);
+                return;
+              }
 
               messageApi.info("Esta función estará disponible próximamente.");
             }}

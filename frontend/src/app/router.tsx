@@ -8,6 +8,7 @@ import CargaAsistencia from '../pages/CargaAsistencia'
 import InicioProfesor from '../pages/InicioProfesor'
 import PanelAlumno from '../pages/Alumno/PanelAlumno'
 import MisAsistencias from '../pages/Alumno/MisAsistencias'
+import MisCursos from "../pages/MisCursos"
 import ProtectedRoute from './ProtectedRoute'
 import { ROUTES } from '../constants/routes'
 
@@ -39,6 +40,7 @@ function AppRouter() {
           </ProtectedRoute>
         }
       />
+      <Route path={ROUTES.PROFESOR_CURSOS} element={<MisCursos />} />
 
       <Route
         path={ROUTES.ALUMNO}

@@ -351,7 +351,8 @@ export default function CargaAsistencia() {
 
           <Menu
             mode="inline"
-            selectedKeys={["asistencia"]}
+            inlineIndent={16}
+            selectedKeys={["asistencia"]} 
             items={opcionesMenu}
             onClick={({ key }) => {
               if (key === "inicio") {
@@ -362,11 +363,14 @@ export default function CargaAsistencia() {
                 navigate(ROUTES.PROFESOR_ASISTENCIA);
                 return;
               }
-              
-              // Para 'cursos', 'alumnos', 'materias' u otras:
-              messageApi.info("Esta función estará disponible próximamente.");
+              if (key === "cursos") {
+                navigate(ROUTES.PROFESOR_CURSOS);
+                return;
+              }
+
+              message.info("Esta función estará disponible próximamente.");
             }}
-            className="asistencia-menu"
+            className="..."
           />
 
           <div className="asistencia-sidebar-bottom">
