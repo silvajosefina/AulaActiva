@@ -5,6 +5,7 @@ import Registro from '../pages/Registro/Registro'
 import RecuperarContrasena from '../pages/RecuperarContrasena/RecuperarContrasena'
 import CargaAsistencia from '../pages/CargaAsistencia'
 import InicioProfesor from '../pages/InicioProfesor'
+import MisCursos from "../pages/MisCursos"
 import ProtectedRoute from './ProtectedRoute'
 import { ROUTES } from '../constants/routes'
 
@@ -31,6 +32,7 @@ function AppRouter() {
           </ProtectedRoute>
         }
       />
+      <Route path={ROUTES.PROFESOR_CURSOS} element={<MisCursos />} />
       <Route path="*" element={<Navigate to={ROUTES.INICIO} replace />} />
     </Routes>
   )
