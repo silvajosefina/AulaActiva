@@ -32,7 +32,7 @@ function Login() {
       saveSession(token, usuario, values.recordarme)
 
       if (usuario.rol === 'DOCENTE') {
-        navigate(ROUTES.PROFESOR_ASISTENCIA)
+        navigate(ROUTES.PROFESOR_INICIO)
       } else {
         messageApi.info('La pantalla de Alumno todavía está en construcción.')
       }
