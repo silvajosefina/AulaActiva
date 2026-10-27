@@ -1,3 +1,4 @@
+
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Inicio from '../pages/Inicio/Inicio'
 import Login from '../pages/Login/Login'
@@ -5,6 +6,8 @@ import Registro from '../pages/Registro/Registro'
 import RecuperarContrasena from '../pages/RecuperarContrasena/RecuperarContrasena'
 import CargaAsistencia from '../pages/CargaAsistencia'
 import InicioProfesor from '../pages/InicioProfesor'
+import PanelAlumno from '../pages/Alumno/PanelAlumno'
+import MisAsistencias from '../pages/Alumno/MisAsistencias'
 import ProtectedRoute from './ProtectedRoute'
 import { ROUTES } from '../constants/routes'
 
@@ -14,7 +17,11 @@ function AppRouter() {
       <Route path={ROUTES.INICIO} element={<Inicio />} />
       <Route path={ROUTES.LOGIN} element={<Login />} />
       <Route path={ROUTES.REGISTRO} element={<Registro />} />
-      <Route path={ROUTES.RECUPERAR_CONTRASENA} element={<RecuperarContrasena />} />
+      <Route
+        path={ROUTES.RECUPERAR_CONTRASENA}
+        element={<RecuperarContrasena />}
+      />
+
       <Route
         path={ROUTES.PROFESOR_INICIO}
         element={
@@ -23,6 +30,7 @@ function AppRouter() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path={ROUTES.PROFESOR_ASISTENCIA}
         element={
@@ -31,9 +39,21 @@ function AppRouter() {
           </ProtectedRoute>
         }
       />
+
+      <Route
+        path={ROUTES.ALUMNO}
+        element={<PanelAlumno />}
+      />
+
+      <Route
+        path={ROUTES.ALUMNO_ASISTENCIAS}
+        element={<MisAsistencias />}
+      />
+
       <Route path="*" element={<Navigate to={ROUTES.INICIO} replace />} />
     </Routes>
   )
 }
 
 export default AppRouter
+

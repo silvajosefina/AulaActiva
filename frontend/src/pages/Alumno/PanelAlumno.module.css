@@ -1,0 +1,292 @@
+
+.layout {
+  min-height: 100vh;
+  background: #f7f5f0;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  height: 68px;
+  padding: 0 24px;
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid #e9e4d8;
+}
+
+.headerInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1160px;
+  height: 100%;
+  margin: 0 auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logoMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: #bc9150;
+  color: #fff;
+  font-size: 17px;
+}
+
+.brandText {
+  color: #26211a !important;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nombreHeader {
+  color: #26211a;
+}
+
+.content {
+  padding: 0 24px 48px;
+}
+
+.container {
+  width: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+.bienvenida {
+  position: relative;
+  margin: 36px 0 40px;
+  padding: 40px;
+  overflow: hidden;
+  border: 1px solid #eee5d6;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #fff 0%, #f7f0e4 100%);
+}
+
+.etiqueta {
+  margin-bottom: 14px;
+  padding: 5px 12px;
+  border: none;
+  border-radius: 999px;
+  background: #f1e4cd;
+  color: #8a6530;
+  font-weight: 600;
+}
+
+.titulo {
+  margin: 0 0 12px !important;
+  color: #26211a !important;
+  font-size: clamp(30px, 4vw, 42px) !important;
+}
+
+.subtitulo {
+  max-width: 600px;
+  margin-bottom: 24px;
+  color: #6f675c;
+  font-size: 16px;
+}
+
+.cursoCard {
+  max-width: 360px;
+  border: 1px solid #eee5d6;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.cursoLabel {
+  color: #8a6530;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.seccion {
+  margin-bottom: 36px;
+}
+
+.seccionTitulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.seccionTitulo h2 {
+  margin: 0 0 5px;
+  color: #26211a;
+}
+
+.resumenCard {
+  height: 100%;
+  border: 1px solid #eee8de;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(55, 43, 24, 0.035);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.resumenCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(55, 43, 24, 0.08);
+}
+
+.resumenSuperior {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.iconoResumen {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  font-size: 17px;
+}
+
+.presente {
+  background: #e4efe4;
+  color: #367044;
+}
+
+.ausente {
+  background: #f8e5e1;
+  color: #a74436;
+}
+
+.tarde {
+  background: #fff0d8;
+  color: #98691e;
+}
+
+.justificada {
+  background: #e7e9f8;
+  color: #515b9c;
+}
+
+.cantidad {
+  margin: 20px 0 0 !important;
+  color: #26211a !important;
+  font-size: 32px !important;
+}
+
+.acceso {
+  margin-bottom: 12px;
+}
+
+.historialCard {
+  border: 1px solid #e9e0d2;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.historialContenido {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.historialIcono {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #f1e4cd;
+  color: #8a6530;
+  font-size: 22px;
+}
+
+.historialTexto {
+  flex: 1;
+}
+
+.historialTexto h4 {
+  margin: 0 0 8px;
+  color: #26211a;
+}
+
+.historialTexto p {
+  margin-bottom: 0;
+  color: #6f675c;
+}
+
+.botonHistorial {
+  flex-shrink: 0;
+  height: 42px;
+  padding: 0 20px;
+  border-color: #bc9150;
+  border-radius: 9px;
+  background: #bc9150;
+  box-shadow: none;
+}
+
+.botonHistorial:hover {
+  border-color: #9b743b !important;
+  background: #9b743b !important;
+}
+
+.footer {
+  padding: 24px;
+  border-top: 1px solid #e9e4d8;
+  background: #fff;
+  color: #81786b;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .header {
+    padding: 0 16px;
+  }
+
+  .headerActions {
+    gap: 8px;
+  }
+
+  .nombreHeader {
+    display: none;
+  }
+
+  .content {
+    padding: 0 16px 32px;
+  }
+
+  .bienvenida {
+    margin-top: 20px;
+    padding: 24px 20px;
+  }
+
+  .historialContenido {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .historialTexto {
+    min-width: 0;
+    flex-basis: calc(100% - 70px);
+  }
+
+  .botonHistorial {
+    width: 100%;
+  }
+}
