@@ -50,7 +50,7 @@ function Login() {
   }
 
   const handleForgotPassword = () => {
-    messageApi.info('Esta función estará disponible próximamente.')
+    navigate(ROUTES.RECUPERAR_CONTRASENA)
   }
 
   const handleCreateAccount = () => {
