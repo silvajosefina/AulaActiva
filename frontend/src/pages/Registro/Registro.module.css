@@ -1,0 +1,39 @@
+.icon {
+  color: #bc9150;
+}
+
+.roleGroup {
+  display: flex;
+  width: 100%;
+}
+
+.roleButton {
+  flex: 1;
+  text-align: center;
+}
+
+.alert {
+  margin-bottom: 24px;
+}
+
+.submitItem {
+  margin-bottom: 0;
+}
+
+.submitButton {
+  transition: box-shadow 0.2s ease;
+}
+
+.submitButton:hover {
+  box-shadow: 0 4px 12px rgba(188, 145, 80, 0.3);
+}
+
+.divider {
+  margin: 24px 0 16px;
+}
+
+.footerText {
+  margin-bottom: 0 !important;
+  text-align: center;
+  font-size: 14px;
+}

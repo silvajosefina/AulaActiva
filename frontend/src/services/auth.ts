@@ -16,6 +16,15 @@ export interface LoginResult {
   usuario: AuthUser
 }
 
+export interface RegisterData {
+  nombre: string
+  apellido: string
+  email: string
+  usuario: string
+  contrasena: string
+  rol: RolUsuario
+}
+
 export class AuthError extends Error {}
 
 const TOKEN_KEY = 'aulaactiva_token'
@@ -32,6 +41,21 @@ export async function login(usuario: string, contrasena: string): Promise<LoginR
   } catch (err) {
     if (axios.isAxiosError<{ message?: string }>(err) && err.response?.status === 401) {
       throw new AuthError(err.response.data?.message ?? 'Usuario o contraseña incorrectos')
+    }
+    throw err
+  }
+}
+
+export async function register(datos: RegisterData): Promise<AuthUser> {
+  try {
+    const { data } = await api.post<{ usuario: AuthUser }>('/auth/register', datos)
+    return data.usuario
+  } catch (err) {
+    if (axios.isAxiosError<{ message?: string }>(err)) {
+      const status = err.response?.status
+      if (status === 400 || status === 409) {
+        throw new AuthError(err.response?.data?.message ?? 'No pudimos crear la cuenta')
+      }
     }
     throw err
   }
