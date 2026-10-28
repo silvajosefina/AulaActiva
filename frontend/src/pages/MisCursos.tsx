@@ -261,7 +261,6 @@ export default function MisCursos() {
           </Header>
 
           <Content className="cursos-content">
-            {/* ENCABEZADO Y BUSCADOR */}
             <div className="cursos-encabezado">
               <div>
                 <Title level={2} style={{ margin: 0, color: "#26211a" }}>
@@ -284,11 +283,10 @@ export default function MisCursos() {
               </div>
             </div>
 
-            {/* GRILLA DE TARJETAS DE CURSOS */}
             <Row gutter={[20, 20]}>
               {cursosFiltrados.map((curso) => (
                 <Col xs={24} md={12} lg={12} key={curso.id}>
-                  <Card className="curso-card" bordered={false}>
+                  <Card className="curso-card" variant="borderless">
                     <div className="curso-card-header">
                       <div>
                         <Tag color="gold" style={{ borderRadius: 6, marginBottom: 6 }}>

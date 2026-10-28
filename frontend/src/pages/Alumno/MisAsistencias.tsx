@@ -15,6 +15,7 @@ import {
   CalendarOutlined,
   ScheduleOutlined,
 } from '@ant-design/icons'
+import { ROUTES } from '../../constants/routes'
 import styles from './MisAsistencias.module.css'
 
 const { Header, Content, Footer } = Layout
@@ -86,7 +87,7 @@ function MisAsistencias() {
 
           <Button
             icon={<ArrowLeftOutlined />}
-            onClick={() => navigate('/alumno')}
+            onClick={() => navigate(ROUTES.ALUMNO)}
           >
             Volver al panel
           </Button>
@@ -110,7 +111,7 @@ function MisAsistencias() {
             </Paragraph>
           </div>
 
-          <Card className={styles.historialCard} bordered={false}>
+          <Card className={styles.historialCard} variant="borderless">
             <div className={styles.tablaEncabezado}>
               <div>
                 <Title level={4}>Bases de Datos</Title>

@@ -311,7 +311,6 @@ export default function InicioProfesor() {
           </Header>
 
           <Content className="inicio-content">
-            {/* SALUDO Y BIENVENIDA */}
             <div className="inicio-encabezado">
               <Title level={2} style={{ margin: 0, color: "#26211a" }}>
                 ¡Buen día, Prof. {nombreCompleto.split(" ")[1] || nombreCompleto}!
@@ -321,7 +320,6 @@ export default function InicioProfesor() {
               </Text>
             </div>
 
-            {/* TARJETAS KPI DE RESUMEN */}
             <div className="inicio-kpi-grid">
               <div className="inicio-kpi-card">
                 <div className="inicio-kpi-icon brown">
@@ -366,7 +364,6 @@ export default function InicioProfesor() {
               </div>
             </div>
 
-            {/* SECCIÓN DE ACCESOS RÁPIDOS */}
             <div className="inicio-seccion-accesos">
               <Title level={4} style={{ margin: "0 0 14px", color: "#26211a" }}>
                 Acciones rápidas
@@ -428,7 +425,6 @@ export default function InicioProfesor() {
               </Row>
             </div>
 
-            {/* SECCIÓN PRINCIPAL: PRÓXIMOS CURSADOS (A ANCHO COMPLETO) */}
             <Row gutter={[20, 20]} style={{ marginTop: 24 }}>
               <Col xs={24}>
                 <section className="inicio-card-seccion">

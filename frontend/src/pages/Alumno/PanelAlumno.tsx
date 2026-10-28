@@ -19,6 +19,8 @@ import {
   ScheduleOutlined,
   UserOutlined,
 } from '@ant-design/icons'
+import { clearSession, getSessionUser } from '../../services/auth'
+import { ROUTES } from '../../constants/routes'
 import styles from './PanelAlumno.module.css'
 
 const { Header, Content, Footer } = Layout
@@ -26,11 +28,17 @@ const { Title, Text, Paragraph } = Typography
 
 function PanelAlumno() {
   const navigate = useNavigate()
+  const usuario = getSessionUser()
 
   const alumno = {
-    nombre: 'Lucía Fernández',
+    nombre: usuario ? `${usuario.nombre} ${usuario.apellido}` : 'Alumno',
     curso: 'Bases de Datos',
     comision: '2K1',
+  }
+
+  const cerrarSesion = () => {
+    clearSession()
+    navigate(ROUTES.LOGIN)
   }
 
   const resumen = [
@@ -78,7 +86,7 @@ function PanelAlumno() {
             </Text>
             <Button
               icon={<LogoutOutlined />}
-              onClick={() => navigate('/')}
+              onClick={cerrarSesion}
             >
               Salir
             </Button>
@@ -99,7 +107,7 @@ function PanelAlumno() {
               Consultá tu asistencia y seguí tu recorrido académico.
             </Paragraph>
 
-            <Card className={styles.cursoCard} bordered={false}>
+            <Card className={styles.cursoCard} variant="borderless">
               <Text className={styles.cursoLabel}>MI CURSO</Text>
               <Title level={4}>{alumno.curso}</Title>
               <Text>Comisión {alumno.comision}</Text>
@@ -119,7 +127,7 @@ function PanelAlumno() {
             <Row gutter={[16, 16]}>
               {resumen.map((item) => (
                 <Col xs={24} sm={12} lg={6} key={item.titulo}>
-                  <Card className={styles.resumenCard} bordered={false}>
+                  <Card className={styles.resumenCard} variant="borderless">
                     <div className={styles.resumenSuperior}>
                       <span className={`${styles.iconoResumen} ${item.clase}`}>
                         {item.icono}
@@ -138,7 +146,7 @@ function PanelAlumno() {
           </section>
 
           <section className={styles.acceso}>
-            <Card bordered={false} className={styles.historialCard}>
+            <Card variant="borderless" className={styles.historialCard}>
               <div className={styles.historialContenido}>
                 <div className={styles.historialIcono}>
                   <FileTextOutlined />
@@ -155,7 +163,7 @@ function PanelAlumno() {
                 <Button
                   type="primary"
                   className={styles.botonHistorial}
-                  onClick={() => navigate('/alumno/asistencias')}
+                  onClick={() => navigate(ROUTES.ALUMNO_ASISTENCIAS)}
                 >
                   Ver historial
                 </Button>

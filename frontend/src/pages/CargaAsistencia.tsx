@@ -368,9 +368,9 @@ export default function CargaAsistencia() {
                 return;
               }
 
-              message.info("Esta función estará disponible próximamente.");
+              messageApi.info("Esta función estará disponible próximamente.");
             }}
-            className="..."
+            className="asistencia-menu"
           />
 
           <div className="asistencia-sidebar-bottom">
@@ -487,8 +487,7 @@ export default function CargaAsistencia() {
               </Button>
             </section>
 
-            {/* RESUMEN DE 5 TARJETAS HORIZONTALES */}
-            <div className="asistencia-resumen" style={{ gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}>
+            <div className="asistencia-resumen">
               <div className="asistencia-resumen-item">
                 <div className="asistencia-resumen-icon neutro">
                   <TeamOutlined />
