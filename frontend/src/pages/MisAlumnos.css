@@ -1,0 +1,151 @@
+.alumnos-layout {
+  min-height: 100vh;
+  background: #f7f5f0;
+}
+
+.alumnos-sidebar {
+  border-right: 1px solid #e9e4d8;
+}
+
+.alumnos-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 20px 16px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #26211a;
+}
+
+.alumnos-logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: #bc9150;
+  color: #ffffff;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.alumnos-menu-label {
+  display: block;
+  padding: 0 20px;
+  margin-bottom: 8px;
+  color: #9a9284;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.alumnos-menu {
+  border-inline-end: none !important;
+  padding: 0 12px;
+}
+
+.alumnos-sidebar-bottom {
+  margin-top: auto;
+  padding: 16px 20px 20px;
+  border-top: 1px solid #efe9db;
+}
+
+.alumnos-ayuda {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: #f1e4cd;
+}
+
+.alumnos-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+  padding: 0 24px;
+  background: #ffffff;
+  border-bottom: 1px solid #e9e4d8;
+  line-height: normal;
+}
+
+.alumnos-menu-mobile {
+  display: none;
+}
+
+.alumnos-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.alumnos-content {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 28px 28px 40px;
+}
+
+.alumnos-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.alumnos-acciones-header {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* TABLA DE ALUMNOS */
+.alumnos-card-tabla {
+  border: 1px solid #e9e4d8 !important;
+  border-radius: 14px !important;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.alumnos-pie-pagina {
+  display: block;
+  margin-top: 32px;
+  color: #a39c8c;
+  font-size: 11px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .alumnos-header {
+    height: 60px;
+    padding: 0 16px;
+  }
+
+  .alumnos-menu-mobile {
+    display: inline-flex;
+  }
+
+  .alumnos-content {
+    padding: 20px 12px;
+  }
+
+  .alumnos-encabezado {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .alumnos-acciones-header {
+    width: 100%;
+  }
+
+  .alumnos-acciones-header .ant-select,
+  .alumnos-acciones-header .ant-input-affix-wrapper {
+    width: 100% !important;
+  }
+}
