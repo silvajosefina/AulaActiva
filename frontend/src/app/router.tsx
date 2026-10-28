@@ -6,6 +6,7 @@ import RecuperarContrasena from '../pages/RecuperarContrasena/RecuperarContrasen
 import CargaAsistencia from '../pages/CargaAsistencia'
 import InicioProfesor from '../pages/InicioProfesor'
 import MisCursos from '../pages/MisCursos'
+import MisAlumnos from '../pages/MisAlumnos'
 import PanelAlumno from '../pages/Alumno/PanelAlumno'
 import MisAsistencias from '../pages/Alumno/MisAsistencias'
 import ProtectedRoute from './ProtectedRoute'
@@ -60,6 +61,14 @@ function AppRouter() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path={ROUTES.PROFESOR_ALUMNOS}
+        element={
+            <ProtectedRoute rolRequerido="DOCENTE">
+            <MisAlumnos />
+            </ProtectedRoute>
+        }
+     />
 
       <Route path="*" element={<Navigate to={ROUTES.INICIO} replace />} />
     </Routes>
