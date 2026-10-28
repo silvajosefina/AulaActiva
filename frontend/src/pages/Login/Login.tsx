@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Alert, Button, Checkbox, Divider, Form, Input, Radio, Typography, message } from 'antd'
+import { Alert, Button, Checkbox, Divider, Form, Input, Radio, Typography } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import AuthLayout from '../../components/AuthLayout/AuthLayout'
 import { AuthError, login, saveSession } from '../../services/auth'
@@ -21,7 +21,6 @@ interface LoginFormValues {
 function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [messageApi, contextHolder] = message.useMessage()
   const navigate = useNavigate()
   const location = useLocation()
   const recienRegistrado = (location.state as { registrado?: boolean } | null)?.registrado === true
@@ -33,11 +32,7 @@ function Login() {
       const { token, usuario } = await login(values.usuario, values.contrasena)
       saveSession(token, usuario, values.recordarme)
 
-      if (usuario.rol === 'DOCENTE') {
-        navigate(ROUTES.PROFESOR_INICIO)
-      } else {
-        messageApi.info('La pantalla de Alumno todavía está en construcción.')
-      }
+      navigate(usuario.rol === 'DOCENTE' ? ROUTES.PROFESOR_INICIO : ROUTES.ALUMNO)
     } catch (err) {
       setError(
         err instanceof AuthError
@@ -62,8 +57,6 @@ function Login() {
       title="Iniciar sesión"
       subtitle="Accedé con tu usuario institucional"
     >
-      {contextHolder}
-
       {recienRegistrado && !error && (
         <Alert
           type="success"
