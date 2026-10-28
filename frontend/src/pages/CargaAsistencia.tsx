@@ -10,7 +10,6 @@ import {
   Button,
   Table,
   Tag,
-  Radio,
   Space,
   Avatar,
   Dropdown,
@@ -195,34 +194,63 @@ export default function CargaAsistencia() {
         </Space>
       ),
     },
-    {
+{
       title: "ESTADO DE ASISTENCIA",
       key: "estado",
       width: 480,
-      render: (_, alumno) => (
-        <Radio.Group
-          value={alumno.estado}
-          onChange={(e) =>
-            actualizarEstado(alumno.id, e.target.value)
+      render: (_, alumno) => {
+        const estiloBoton = (valor: EstadoAsistencia) => {
+          const seleccionado = alumno.estado === valor;
+          
+          let colorSeleccionadoBg = "#f5f5f5";
+          let colorSeleccionadoTexto = "#595959";
+          let colorBorde = "#d9d9d9";
+
+          if (seleccionado) {
+            if (valor === "P") { colorSeleccionadoBg = "#f6ffed"; colorSeleccionadoTexto = "#52c41a"; colorBorde = "#b7eb8f"; }
+            if (valor === "A") { colorSeleccionadoBg = "#fff2f0"; colorSeleccionadoTexto = "#ff4d4f"; colorBorde = "#ffccc7"; }
+            if (valor === "T") { colorSeleccionadoBg = "#fff7e6"; colorSeleccionadoTexto = "#fa8c16"; colorBorde = "#ffd591"; }
+            if (valor === "J") { colorSeleccionadoBg = "#e6f7ff"; colorSeleccionadoTexto = "#1890ff"; colorBorde = "#91caff"; }
           }
-          optionType="button"
-          buttonStyle="solid"
-          className="asistencia-opciones"
-        >
-          <Radio.Button value="P">
-            <CheckCircleFilled /> P
-          </Radio.Button>
-          <Radio.Button value="A">
-            <CloseCircleOutlined /> A
-          </Radio.Button>
-          <Radio.Button value="T">
-            <ClockCircleOutlined /> T
-          </Radio.Button>
-          <Radio.Button value="J">
-            <InfoCircleOutlined /> J
-          </Radio.Button>
-        </Radio.Group>
-      ),
+
+          return {
+            backgroundColor: seleccionado ? colorSeleccionadoBg : "#ffffff",
+            color: seleccionado ? colorSeleccionadoTexto : "#595959",
+            borderColor: seleccionado ? colorBorde : "#d9d9d9",
+            fontWeight: seleccionado ? 600 : 400,
+            boxShadow: "none",
+          };
+        };
+
+        return (
+          <Space size={4}>
+            <Button
+              style={estiloBoton("P")}
+              onClick={() => actualizarEstado(alumno.id, "P")}
+            >
+              <CheckCircleFilled style={{ color: alumno.estado === "P" ? "#52c41a" : undefined }} /> P
+            </Button>
+            <Button
+              style={estiloBoton("A")}
+              onClick={() => actualizarEstado(alumno.id, "A")}
+            >
+              <CloseCircleOutlined style={{ color: alumno.estado === "A" ? "#ff4d4f" : undefined }} /> A
+            </Button>
+            <Button
+              style={estiloBoton("T")}
+              onClick={() => actualizarEstado(alumno.id, "T")}
+            >
+              <ClockCircleOutlined style={{ color: alumno.estado === "T" ? "#fa8c16" : undefined }} /> T
+            </Button>
+            <Button
+              style={estiloBoton("J")}
+              onClick={() => actualizarEstado(alumno.id, "J")}
+            >
+              <InfoCircleOutlined style={{ color: alumno.estado === "J" ? "#1890ff" : undefined }} /> J
+            </Button>
+          </Space>
+        );
+      },
     },
     {
       title: "REGISTRO",
