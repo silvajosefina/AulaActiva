@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom'
 import {
   Avatar,
@@ -11,6 +12,7 @@ import {
   Typography,
 } from 'antd'
 import {
+  BookOutlined,
   CalendarOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
@@ -19,8 +21,6 @@ import {
   ScheduleOutlined,
   UserOutlined,
 } from '@ant-design/icons'
-import { clearSession, getSessionUser } from '../../services/auth'
-import { ROUTES } from '../../constants/routes'
 import styles from './PanelAlumno.module.css'
 
 const { Header, Content, Footer } = Layout
@@ -28,17 +28,11 @@ const { Title, Text, Paragraph } = Typography
 
 function PanelAlumno() {
   const navigate = useNavigate()
-  const usuario = getSessionUser()
 
   const alumno = {
-    nombre: usuario ? `${usuario.nombre} ${usuario.apellido}` : 'Alumno',
+    nombre: 'Lucía Fernández',
     curso: 'Bases de Datos',
     comision: '2K1',
-  }
-
-  const cerrarSesion = () => {
-    clearSession()
-    navigate(ROUTES.LOGIN)
   }
 
   const resumen = [
@@ -86,7 +80,7 @@ function PanelAlumno() {
             </Text>
             <Button
               icon={<LogoutOutlined />}
-              onClick={cerrarSesion}
+              onClick={() => navigate('/')}
             >
               Salir
             </Button>
@@ -107,7 +101,7 @@ function PanelAlumno() {
               Consultá tu asistencia y seguí tu recorrido académico.
             </Paragraph>
 
-            <Card className={styles.cursoCard} variant="borderless">
+            <Card className={styles.cursoCard} bordered={false}>
               <Text className={styles.cursoLabel}>MI CURSO</Text>
               <Title level={4}>{alumno.curso}</Title>
               <Text>Comisión {alumno.comision}</Text>
@@ -127,7 +121,7 @@ function PanelAlumno() {
             <Row gutter={[16, 16]}>
               {resumen.map((item) => (
                 <Col xs={24} sm={12} lg={6} key={item.titulo}>
-                  <Card className={styles.resumenCard} variant="borderless">
+                  <Card className={styles.resumenCard} bordered={false}>
                     <div className={styles.resumenSuperior}>
                       <span className={`${styles.iconoResumen} ${item.clase}`}>
                         {item.icono}
@@ -146,29 +140,65 @@ function PanelAlumno() {
           </section>
 
           <section className={styles.acceso}>
-            <Card variant="borderless" className={styles.historialCard}>
-              <div className={styles.historialContenido}>
-                <div className={styles.historialIcono}>
-                  <FileTextOutlined />
-                </div>
-
-                <div className={styles.historialTexto}>
-                  <Title level={4}>Mis asistencias</Title>
-                  <Paragraph>
-                    Consultá las fechas y el estado de cada registro,
-                    incluidas las inasistencias justificadas.
-                  </Paragraph>
-                </div>
-
-                <Button
-                  type="primary"
-                  className={styles.botonHistorial}
-                  onClick={() => navigate(ROUTES.ALUMNO_ASISTENCIAS)}
+            <Row gutter={[20, 20]}>
+              <Col xs={24} md={12}>
+                <Card
+                  bordered={false}
+                  className={`${styles.accesoCard} ${styles.accesoCursos}`}
                 >
-                  Ver historial
-                </Button>
-              </div>
-            </Card>
+                  <div className={styles.accesoContenido}>
+                    <div className={styles.accesoIcono}>
+                      <BookOutlined />
+                    </div>
+
+                    <div className={styles.accesoTexto}>
+                      <Title level={4}>Mis cursos</Title>
+                      <Paragraph>
+                        Consultá tus materias, comisiones, horarios
+                        y el detalle de tu asistencia en cada curso.
+                      </Paragraph>
+                    </div>
+
+                    <Button
+                      type="primary"
+                      className={styles.botonAcceso}
+                      onClick={() => navigate('/alumno/cursos')}
+                    >
+                      Ver mis cursos
+                    </Button>
+                  </div>
+                </Card>
+              </Col>
+
+              <Col xs={24} md={12}>
+                <Card
+                  bordered={false}
+                  className={`${styles.accesoCard} ${styles.accesoAsistencias}`}
+                >
+                  <div className={styles.accesoContenido}>
+                    <div className={styles.accesoIcono}>
+                      <FileTextOutlined />
+                    </div>
+
+                    <div className={styles.accesoTexto}>
+                      <Title level={4}>Mis asistencias</Title>
+                      <Paragraph>
+                        Revisá las fechas y el estado de cada registro,
+                        incluidas las inasistencias justificadas.
+                      </Paragraph>
+                    </div>
+
+                    <Button
+                      type="primary"
+                      className={styles.botonAcceso}
+                      onClick={() => navigate('/alumno/asistencias')}
+                    >
+                      Ver historial
+                    </Button>
+                  </div>
+                </Card>
+              </Col>
+            </Row>
           </section>
         </div>
       </Content>

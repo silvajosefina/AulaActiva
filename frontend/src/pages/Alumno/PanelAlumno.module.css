@@ -187,63 +187,115 @@
   font-size: 32px !important;
 }
 
+/* Accesos principales */
+
 .acceso {
   margin-bottom: 12px;
 }
 
-.historialCard {
+.accesoCard {
+  height: 100%;
+  min-height: 220px;
   border: 1px solid #e9e0d2;
-  border-radius: 16px;
-  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 5px 18px rgba(55, 43, 24, 0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.historialContenido {
-  display: flex;
-  align-items: center;
-  gap: 20px;
+.accesoCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 13px 28px rgba(55, 43, 24, 0.13);
 }
 
-.historialIcono {
+/* Tonalidad arena: Mis cursos */
+
+.accesoCursos {
+  background: linear-gradient(135deg, #fff 0%, #f7f0e4 100%);
+  border-color: #ead9b9;
+}
+
+.accesoCursos .accesoIcono {
+  background: #f1e4cd;
+  color: #8a6530;
+}
+
+.accesoCursos .botonAcceso {
+  border-color: #bc9150;
+  background: #bc9150;
+}
+
+.accesoCursos .botonAcceso:hover {
+  border-color: #9b743b !important;
+  background: #9b743b !important;
+}
+
+/* Tonalidad verde: Mis asistencias */
+
+.accesoAsistencias {
+  background: linear-gradient(135deg, #fff 0%, #edf4ec 100%);
+  border-color: #d5e5d3;
+}
+
+.accesoAsistencias .accesoIcono {
+  background: #e4efe4;
+  color: #367044;
+}
+
+.accesoAsistencias .botonAcceso {
+  border-color: #668c69;
+  background: #668c69;
+}
+
+.accesoAsistencias .botonAcceso:hover {
+  border-color: #4d7050 !important;
+  background: #4d7050 !important;
+}
+
+.accesoContenido {
   display: flex;
-  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  height: 100%;
+  padding: 8px;
+}
+
+.accesoIcono {
+  display: flex;
   align-items: center;
   justify-content: center;
   width: 52px;
   height: 52px;
   border-radius: 14px;
-  background: #f1e4cd;
-  color: #8a6530;
-  font-size: 22px;
+  font-size: 23px;
 }
 
-.historialTexto {
+.accesoTexto {
   flex: 1;
+  width: 100%;
 }
 
-.historialTexto h4 {
+.accesoTexto h4 {
   margin: 0 0 8px;
   color: #26211a;
 }
 
-.historialTexto p {
+.accesoTexto p {
   margin-bottom: 0;
   color: #6f675c;
+  line-height: 1.6;
 }
 
-.botonHistorial {
-  flex-shrink: 0;
+.botonAcceso {
   height: 42px;
   padding: 0 20px;
-  border-color: #bc9150;
   border-radius: 9px;
-  background: #bc9150;
   box-shadow: none;
+  font-weight: 600;
 }
 
-.botonHistorial:hover {
-  border-color: #9b743b !important;
-  background: #9b743b !important;
-}
+/* Pie de página */
 
 .footer {
   padding: 24px;
@@ -252,6 +304,8 @@
   color: #81786b;
   text-align: center;
 }
+
+/* Adaptación para celulares */
 
 @media (max-width: 640px) {
   .header {
@@ -275,18 +329,31 @@
     padding: 24px 20px;
   }
 
-  .historialContenido {
-    align-items: flex-start;
-    flex-wrap: wrap;
-    gap: 14px;
+  .accesoCard {
+    min-height: auto;
   }
 
-  .historialTexto {
-    min-width: 0;
-    flex-basis: calc(100% - 70px);
+  .accesoContenido {
+    padding: 4px;
   }
 
-  .botonHistorial {
+  .botonAcceso {
     width: 100%;
   }
 }
+
+/* Respeta la preferencia de movimiento reducido */
+
+@media (prefers-reduced-motion: reduce) {
+  .resumenCard,
+  .accesoCard {
+    transition: none;
+  }
+
+  .resumenCard:hover,
+  .accesoCard:hover {
+    transform: none;
+  }
+}
+
+
