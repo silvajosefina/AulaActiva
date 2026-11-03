@@ -236,7 +236,6 @@ export default function Materias() {
           </Header>
 
           <Content className="materias-content">
-            {/* ENCABEZADO Y BÚSQUEDA */}
             <div className="materias-encabezado">
               <div>
                 <Title level={2} style={{ margin: 0, color: "#26211a" }}>
@@ -257,12 +256,11 @@ export default function Materias() {
               />
             </div>
 
-            {/* GRILLA DE MATERIAS */}
             <Row gutter={[20, 20]}>
               {materiasFiltradas.map((materia) => (
                 <Col xs={24} md={12} lg={8} key={materia.id}>
                   <Card
-                    bordered={false}
+                    variant="borderless"
                     className="materia-card"
                     actions={[
                       <Button

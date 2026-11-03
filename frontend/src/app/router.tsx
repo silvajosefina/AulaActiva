@@ -7,9 +7,9 @@ import CargaAsistencia from '../pages/CargaAsistencia'
 import InicioProfesor from '../pages/InicioProfesor'
 import MisCursos from '../pages/MisCursos'
 import MisAlumnos from '../pages/MisAlumnos'
+import Materias from '../pages/Materias'
 import PanelAlumno from '../pages/Alumno/PanelAlumno'
 import MisAsistencias from '../pages/Alumno/MisAsistencias'
-import Materias from "../pages/Materias";
 import MisCursosAlumno from '../pages/Alumno/MisCursos'
 import ProtectedRoute from './ProtectedRoute'
 import { ROUTES } from '../constants/routes'
@@ -46,6 +46,22 @@ function AppRouter() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path={ROUTES.PROFESOR_ALUMNOS}
+        element={
+          <ProtectedRoute rolRequerido="DOCENTE">
+            <MisAlumnos />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ROUTES.PROFESOR_MATERIAS}
+        element={
+          <ProtectedRoute rolRequerido="DOCENTE">
+            <Materias />
+          </ProtectedRoute>
+        }
+      />
 
       <Route
         path={ROUTES.ALUMNO}
@@ -64,21 +80,15 @@ function AppRouter() {
         }
       />
       <Route
-        path={ROUTES.PROFESOR_ALUMNOS}
-        element={
-            <ProtectedRoute rolRequerido="DOCENTE">
-            <MisAlumnos />
-            </ProtectedRoute>
-        }
-     />
-
-      <Route
         path={ROUTES.ALUMNO_CURSOS}
-        element={<MisCursosAlumno />}
+        element={
+          <ProtectedRoute rolRequerido="ALUMNO">
+            <MisCursosAlumno />
+          </ProtectedRoute>
+        }
       />
 
       <Route path="*" element={<Navigate to={ROUTES.INICIO} replace />} />
-      <Route path={ROUTES.PROFESOR_MATERIAS} element={<Materias />} />
     </Routes>
   )
 }

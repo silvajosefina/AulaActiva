@@ -324,7 +324,7 @@ export default function MisCursos() {
                     </div>
 
                     <div className="curso-card-body">
-                      <Space direction="vertical" size={8} style={{ width: "100%" }}>
+                      <Space orientation="vertical" size={8} style={{ width: "100%" }}>
                         <div className="curso-info-item">
                           <ClockCircleOutlined className="curso-info-icon" />
                           <Text style={{ fontSize: 13 }}>{curso.horario}</Text>
