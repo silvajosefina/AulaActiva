@@ -399,6 +399,10 @@ export default function CargaAsistencia() {
                 navigate(ROUTES.PROFESOR_ALUMNOS);
                 return;
               }
+              if (key === "materias") {
+                navigate(ROUTES.PROFESOR_MATERIAS);
+                return;
+              }
 
               messageApi.info("Esta función estará disponible próximamente.");
             }}

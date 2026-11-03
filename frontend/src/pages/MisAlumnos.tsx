@@ -295,6 +295,10 @@ const columnas: ColumnsType<Alumno> = [
               if (key === "cursos") return navigate(ROUTES.PROFESOR_CURSOS);
               if (key === "asistencia") return navigate(ROUTES.PROFESOR_ASISTENCIA);
               if (key === "alumnos") return;
+              if (key === "materias") {
+                navigate(ROUTES.PROFESOR_MATERIAS);
+                return;
+              }
 
               messageApi.info("Esta función estará disponible próximamente.");
             }}
