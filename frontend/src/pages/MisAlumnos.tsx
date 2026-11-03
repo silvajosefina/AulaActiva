@@ -355,7 +355,6 @@ const columnas: ColumnsType<Alumno> = [
           </Header>
 
           <Content className="alumnos-content">
-            {/* ENCABEZADO */}
             <div className="alumnos-encabezado">
               <div>
                 <Title level={2} style={{ margin: 0, color: "#26211a" }}>
@@ -366,7 +365,6 @@ const columnas: ColumnsType<Alumno> = [
                 </Text>
               </div>
 
-              {/* FILTROS Y BÚSQUEDA */}
               <div className="alumnos-acciones-header">
                 <Select
                   defaultValue="todas"
@@ -392,8 +390,7 @@ const columnas: ColumnsType<Alumno> = [
               </div>
             </div>
 
-            {/* TABLA DE ALUMNOS */}
-            <Card className="alumnos-card-tabla" bordered={false}>
+            <Card className="alumnos-card-tabla" variant="borderless">
               <Table
                 columns={columnas}
                 dataSource={alumnosFiltrados}
