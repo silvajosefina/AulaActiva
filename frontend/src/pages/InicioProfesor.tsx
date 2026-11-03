@@ -259,6 +259,10 @@ export default function InicioProfesor() {
                 navigate(ROUTES.PROFESOR_ALUMNOS);
                 return;
               }
+              if (key === "materias") {
+                navigate(ROUTES.PROFESOR_MATERIAS);
+                return;
+              }
 
               messageApi.info("Esta función estará disponible próximamente.");
             }}
@@ -394,7 +398,7 @@ export default function InicioProfesor() {
                 <Col xs={24} sm={8}>
                   <div
                     className="inicio-acceso-card"
-                    onClick={() => messageApi.info("Esta función estará disponible próximamente.")}
+                    onClick={() => navigate(ROUTES.PROFESOR_CURSOS)}
                   >
                     <ReadOutlined className="inicio-acceso-icon" />
                     <div>
@@ -412,7 +416,7 @@ export default function InicioProfesor() {
                 <Col xs={24} sm={8}>
                   <div
                     className="inicio-acceso-card"
-                    onClick={() => messageApi.info("Esta función estará disponible próximamente.")}
+                    onClick={() => navigate(ROUTES.PROFESOR_ALUMNOS)}
                   >
                     <SearchOutlined className="inicio-acceso-icon" />
                     <div>
