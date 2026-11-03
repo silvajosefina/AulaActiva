@@ -11,5 +11,6 @@ export const ROUTES = {
   PROFESOR_MATERIAS: '/profesor/materias',
   ALUMNO: '/alumno',
   ALUMNO_ASISTENCIAS: '/alumno/asistencias',
+  ALUMNO_CURSOS: '/alumno/cursos',
 } as const
 

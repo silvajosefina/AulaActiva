@@ -8,6 +8,7 @@ import CargaAsistencia from '../pages/CargaAsistencia'
 import InicioProfesor from '../pages/InicioProfesor'
 import PanelAlumno from '../pages/Alumno/PanelAlumno'
 import MisAsistencias from '../pages/Alumno/MisAsistencias'
+import MisCursos from '../pages/Alumno/MisCursos'
 import ProtectedRoute from './ProtectedRoute'
 import { ROUTES } from '../constants/routes'
 
@@ -48,6 +49,11 @@ function AppRouter() {
       <Route
         path={ROUTES.ALUMNO_ASISTENCIAS}
         element={<MisAsistencias />}
+      />
+
+      <Route
+        path={ROUTES.ALUMNO_CURSOS}
+        element={<MisCursos />}
       />
 
       <Route path="*" element={<Navigate to={ROUTES.INICIO} replace />} />
