@@ -10,6 +10,7 @@ import MisAlumnos from '../pages/MisAlumnos'
 import PanelAlumno from '../pages/Alumno/PanelAlumno'
 import MisAsistencias from '../pages/Alumno/MisAsistencias'
 import Materias from "../pages/Materias";
+import MisCursosAlumno from '../pages/Alumno/MisCursos'
 import ProtectedRoute from './ProtectedRoute'
 import { ROUTES } from '../constants/routes'
 
@@ -70,6 +71,11 @@ function AppRouter() {
             </ProtectedRoute>
         }
      />
+
+      <Route
+        path={ROUTES.ALUMNO_CURSOS}
+        element={<MisCursosAlumno />}
+      />
 
       <Route path="*" element={<Navigate to={ROUTES.INICIO} replace />} />
       <Route path={ROUTES.PROFESOR_MATERIAS} element={<Materias />} />

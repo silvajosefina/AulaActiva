@@ -141,6 +141,11 @@
   color: #515b9c;
 }
 
+.estadoS {
+  background: #edf0f4;
+  color: #748195;
+}
+
 .referencias {
   display: flex;
   flex-direction: column;

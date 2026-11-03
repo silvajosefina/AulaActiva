@@ -101,19 +101,321 @@
   font-size: 16px;
 }
 
-.cursoCard {
-  max-width: 360px;
-  border: 1px solid #eee5d6;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.85);
+/* AGENDA SEMANAL */
+
+.agenda {
+  margin-top: 28px;
+  padding: 26px;
+  border: 1px solid #e8e5d9;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 5px 20px rgba(55, 43, 24, 0.045);
 }
 
-.cursoLabel {
-  color: #8a6530;
+.agendaEncabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.agendaTitulo {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.agendaTitulo h3 {
+  margin: 0 0 3px;
+  color: #26211a;
+}
+
+.agendaIcono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  background: #e7f0df;
+  color: #477f68;
+  font-size: 21px;
+}
+
+.agendaNavegacion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.botonSemana {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-color: #dce5d8;
+  border-radius: 9px;
+  color: #477f68;
+  transition: all 0.2s ease;
+}
+
+.botonSemana:hover {
+  border-color: #477f68 !important;
+  background: #e7f0df !important;
+  color: #315e4b !important;
+}
+
+.botonHoy {
+  height: 36px;
+  border-color: #477f68;
+  border-radius: 9px;
+  color: #477f68;
+  font-weight: 600;
+}
+
+.botonHoy:hover {
+  border-color: #315e4b !important;
+  background: #e7f0df !important;
+  color: #315e4b !important;
+}
+
+.agendaPeriodo {
+  margin: 20px 0 15px;
+  color: #81786b;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.agendaGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  animation: aparecerSemana 0.35s ease;
+}
+
+@keyframes aparecerSemana {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.diaCard {
+  display: flex;
+  flex-direction: column;
+  min-height: 205px;
+  padding: 13px 10px;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    background-color 0.22s ease;
+}
+
+.diaCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 17px rgba(45, 65, 45, 0.12);
+}
+
+.diaConClases {
+  border-color: #c9dfb5;
+  background: #a7d96b;
+}
+
+.diaConClases:hover {
+  background: #b5e17f;
+}
+
+.diaLibre {
+  border-color: #ead0b7;
+  background: #dda16d;
+}
+
+.diaLibre:hover {
+  background: #e7b17f;
+}
+
+.diaHoy {
+  border: 2px solid #477f68;
+  background: #477f68;
+  color: #fff;
+  box-shadow: 0 4px 13px rgba(48, 91, 70, 0.18);
+}
+
+.diaHoy:hover {
+  background: #568e76;
+}
+
+.diaEncabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.diaNombre {
+  color: #30452b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.diaHoy .diaNombre,
+.diaHoy .diaFecha,
+.diaHoy .diaSinClases,
+.diaHoy .diaSinClases .ant-typography {
+  color: #fff !important;
+}
+
+.etiquetaHoy {
+  padding: 3px 6px;
+  border-radius: 20px;
+  background: #fff;
+  color: #477f68;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.diaFecha {
+  margin-top: 5px;
+  color: #53634b;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.listaClases {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-top: 13px;
+}
+
+.claseItem {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 9px 7px;
+  border: 1px solid rgba(65, 93, 51, 0.12);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.claseMateria {
+  color: #30452b;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 1px;
+  line-height: 1.35;
 }
+
+.claseHorario,
+.claseComision {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #53634b;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.diaHoy .claseItem {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.diaHoy .claseMateria,
+.diaHoy .claseHorario,
+.diaHoy .claseComision {
+  color: #304d3e;
+}
+
+.diaSinClases {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 10px;
+  color: #75502f;
+  font-size: 12px;
+  text-align: center;
+}
+
+.diaSinClases .anticon {
+  font-size: 21px;
+  opacity: 0.8;
+}
+
+.agendaPie {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #eee8de;
+}
+
+.referenciasAgenda {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.referenciasAgenda span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #6f675c;
+  font-size: 11px;
+}
+
+.referenciasAgenda i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.referenciaVerde {
+  background: #a7d96b;
+}
+
+.referenciaNaranja {
+  background: #dda16d;
+}
+
+.referenciaHoy {
+  background: #477f68;
+}
+
+.enlaceCursos {
+  color: #477f68 !important;
+  font-weight: 600;
+}
+
+.enlaceCursos:hover {
+  color: #315e4b !important;
+}
+
+.notaAgenda {
+  display: block;
+  margin-top: 13px;
+  color: #938a7e;
+  font-size: 11px;
+}
+
+/* RESUMEN DE ASISTENCIA */
 
 .seccion {
   margin-bottom: 36px;
@@ -187,7 +489,7 @@
   font-size: 32px !important;
 }
 
-/* Accesos principales */
+/* ACCESOS PRINCIPALES */
 
 .acceso {
   margin-bottom: 12px;
@@ -196,9 +498,9 @@
 .accesoCard {
   height: 100%;
   min-height: 220px;
+  overflow: hidden;
   border: 1px solid #e9e0d2;
   border-radius: 18px;
-  overflow: hidden;
   box-shadow: 0 5px 18px rgba(55, 43, 24, 0.06);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
@@ -208,11 +510,9 @@
   box-shadow: 0 13px 28px rgba(55, 43, 24, 0.13);
 }
 
-/* Tonalidad arena: Mis cursos */
-
 .accesoCursos {
-  background: linear-gradient(135deg, #fff 0%, #f7f0e4 100%);
   border-color: #ead9b9;
+  background: linear-gradient(135deg, #fff 0%, #f7f0e4 100%);
 }
 
 .accesoCursos .accesoIcono {
@@ -230,11 +530,9 @@
   background: #9b743b !important;
 }
 
-/* Tonalidad verde: Mis asistencias */
-
 .accesoAsistencias {
-  background: linear-gradient(135deg, #fff 0%, #edf4ec 100%);
   border-color: #d5e5d3;
+  background: linear-gradient(135deg, #fff 0%, #edf4ec 100%);
 }
 
 .accesoAsistencias .accesoIcono {
@@ -295,7 +593,7 @@
   font-weight: 600;
 }
 
-/* Pie de página */
+/* PIE DE PÁGINA */
 
 .footer {
   padding: 24px;
@@ -305,7 +603,17 @@
   text-align: center;
 }
 
-/* Adaptación para celulares */
+/* ADAPTACIÓN PARA CELULARES */
+
+@media (max-width: 900px) {
+  .agendaGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .diaCard {
+    min-height: 185px;
+  }
+}
 
 @media (max-width: 640px) {
   .header {
@@ -329,6 +637,36 @@
     padding: 24px 20px;
   }
 
+  .agenda {
+    padding: 17px 13px;
+  }
+
+  .agendaEncabezado {
+    align-items: flex-start;
+  }
+
+  .agendaGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+
+  .diaCard {
+    min-height: 170px;
+    padding: 12px 9px;
+  }
+
+  .diaNombre {
+    font-size: 12px;
+  }
+
+  .agendaPie {
+    align-items: flex-start;
+  }
+
+  .referenciasAgenda {
+    gap: 10px;
+  }
+
   .accesoCard {
     min-height: auto;
   }
@@ -342,18 +680,23 @@
   }
 }
 
-/* Respeta la preferencia de movimiento reducido */
+/* RESPETA LA PREFERENCIA DE MOVIMIENTO REDUCIDO */
 
 @media (prefers-reduced-motion: reduce) {
+  .agendaGrid {
+    animation: none;
+  }
+
+  .diaCard,
   .resumenCard,
-  .accesoCard {
+  .accesoCard,
+  .botonSemana {
     transition: none;
   }
 
+  .diaCard:hover,
   .resumenCard:hover,
   .accesoCard:hover {
     transform: none;
   }
 }
-
-
