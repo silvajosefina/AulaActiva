@@ -16,6 +16,7 @@ import {
   Progress,
   Card,
   message,
+  Drawer,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
@@ -242,6 +243,62 @@ const columnas: ColumnsType<Alumno> = [
     },
   };
 
+  const rutasMenu: Record<string, string> = {
+    inicio: ROUTES.PROFESOR_INICIO,
+    asistencia: ROUTES.PROFESOR_ASISTENCIA,
+    cursos: ROUTES.PROFESOR_CURSOS,
+    alumnos: ROUTES.PROFESOR_ALUMNOS,
+    materias: ROUTES.PROFESOR_MATERIAS,
+  };
+
+  const contenidoMenu = (
+    <>
+      <div className="alumnos-logo">
+        <div className="alumnos-logo-icon">
+          <BookOutlined />
+        </div>
+        <span>AulaActiva</span>
+      </div>
+
+      <Text className="alumnos-menu-label">MENÚ PRINCIPAL</Text>
+
+      <Menu
+        mode="inline"
+        selectedKeys={["alumnos"]}
+        items={opcionesMenu}
+        onClick={({ key }) => {
+          setMenuAbierto(false);
+          const ruta = rutasMenu[key];
+          if (ruta) {
+            navigate(ruta);
+            return;
+          }
+          messageApi.info("Esta función estará disponible próximamente.");
+        }}
+        className="alumnos-menu"
+      />
+
+      <div className="alumnos-sidebar-bottom">
+        <div className="alumnos-ayuda">
+          <Text strong>¿Necesitás ayuda?</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            Consultá con el administrador del sistema.
+          </Text>
+        </div>
+
+        <Button
+          type="text"
+          icon={<LogoutOutlined />}
+          block
+          style={{ textAlign: "left", color: "#6b6557" }}
+          onClick={cerrarSesion}
+        >
+          Cerrar sesión
+        </Button>
+      </div>
+    </>
+  );
+
   return (
     <ConfigProvider
       locale={locale}
@@ -277,53 +334,19 @@ const columnas: ColumnsType<Alumno> = [
           className="alumnos-sidebar"
           style={{ background: "#fff" }}
         >
-          <div className="alumnos-logo">
-            <div className="alumnos-logo-icon">
-              <BookOutlined />
-            </div>
-            <span>AulaActiva</span>
-          </div>
-
-          <Text className="alumnos-menu-label">MENÚ PRINCIPAL</Text>
-
-          <Menu
-            mode="inline"
-            selectedKeys={["alumnos"]}
-            items={opcionesMenu}
-            onClick={({ key }) => {
-              if (key === "inicio") return navigate(ROUTES.PROFESOR_INICIO);
-              if (key === "cursos") return navigate(ROUTES.PROFESOR_CURSOS);
-              if (key === "asistencia") return navigate(ROUTES.PROFESOR_ASISTENCIA);
-              if (key === "alumnos") return;
-              if (key === "materias") {
-                navigate(ROUTES.PROFESOR_MATERIAS);
-                return;
-              }
-
-              messageApi.info("Esta función estará disponible próximamente.");
-            }}
-            className="alumnos-menu"
-          />
-
-          <div className="alumnos-sidebar-bottom">
-            <div className="alumnos-ayuda">
-              <Text strong>¿Necesitás ayuda?</Text>
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                Consultá con el administrador del sistema.
-              </Text>
-            </div>
-
-            <Button
-              type="text"
-              icon={<LogoutOutlined />}
-              block
-              style={{ textAlign: "left", color: "#6b6557" }}
-              onClick={cerrarSesion}
-            >
-              Cerrar sesión
-            </Button>
-          </div>
+          {contenidoMenu}
         </Sider>
+
+        <Drawer
+          placement="left"
+          size={260}
+          open={menuAbierto}
+          onClose={() => setMenuAbierto(false)}
+          closable={false}
+          styles={{ body: { padding: 0, display: "flex", flexDirection: "column" } }}
+        >
+          {contenidoMenu}
+        </Drawer>
 
         <Layout style={{ minWidth: 0, background: "#f6f8f6" }}>
           <Header className="alumnos-header">

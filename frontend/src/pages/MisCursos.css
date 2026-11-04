@@ -7,6 +7,10 @@
   border-right: 1px solid #e9e4d8;
 }
 
+.cursos-sidebar.ant-layout-sider-collapsed {
+  border-right: none;
+}
+
 .cursos-logo {
   display: flex;
   align-items: center;
@@ -74,6 +78,12 @@
 
 .cursos-menu-mobile {
   display: none;
+}
+
+@media (max-width: 991px) {
+  .cursos-menu-mobile {
+    display: inline-flex;
+  }
 }
 
 .cursos-header-right {
@@ -169,10 +179,6 @@
   .cursos-header {
     height: 60px;
     padding: 0 16px;
-  }
-
-  .cursos-menu-mobile {
-    display: inline-flex;
   }
 
   .cursos-content {

@@ -16,6 +16,7 @@ import {
   Card,
   Badge,
   message,
+  Drawer,
 } from "antd";
 import {
   HomeOutlined,
@@ -144,6 +145,62 @@ export default function MisCursos() {
     },
   };
 
+  const rutasMenu: Record<string, string> = {
+    inicio: ROUTES.PROFESOR_INICIO,
+    asistencia: ROUTES.PROFESOR_ASISTENCIA,
+    cursos: ROUTES.PROFESOR_CURSOS,
+    alumnos: ROUTES.PROFESOR_ALUMNOS,
+    materias: ROUTES.PROFESOR_MATERIAS,
+  };
+
+  const contenidoMenu = (
+    <>
+      <div className="cursos-logo">
+        <div className="cursos-logo-icon">
+          <BookOutlined />
+        </div>
+        <span>AulaActiva</span>
+      </div>
+
+      <Text className="cursos-menu-label">MENÚ PRINCIPAL</Text>
+
+      <Menu
+        mode="inline"
+        selectedKeys={["cursos"]}
+        items={opcionesMenu}
+        onClick={({ key }) => {
+          setMenuAbierto(false);
+          const ruta = rutasMenu[key];
+          if (ruta) {
+            navigate(ruta);
+            return;
+          }
+          messageApi.info("Esta función estará disponible próximamente.");
+        }}
+        className="cursos-menu"
+      />
+
+      <div className="cursos-sidebar-bottom">
+        <div className="cursos-ayuda">
+          <Text strong>¿Necesitás ayuda?</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            Consultá con el administrador del sistema.
+          </Text>
+        </div>
+
+        <Button
+          type="text"
+          icon={<LogoutOutlined />}
+          block
+          style={{ textAlign: "left", color: "#6b6557" }}
+          onClick={cerrarSesion}
+        >
+          Cerrar sesión
+        </Button>
+      </div>
+    </>
+  );
+
   return (
     <ConfigProvider
       locale={locale}
@@ -179,65 +236,19 @@ export default function MisCursos() {
           className="cursos-sidebar"
           style={{ background: "#fff" }}
         >
-          <div className="cursos-logo">
-            <div className="cursos-logo-icon">
-              <BookOutlined />
-            </div>
-            <span>AulaActiva</span>
-          </div>
-
-          <Text className="cursos-menu-label">MENÚ PRINCIPAL</Text>
-
-            <Menu
-            mode="inline"
-            selectedKeys={["cursos"]}
-            items={opcionesMenu}
-            onClick={({ key }) => {
-                if (key === "inicio") {
-                navigate(ROUTES.PROFESOR_INICIO);
-                return;
-                }
-                if (key === "asistencia") {
-                navigate(ROUTES.PROFESOR_ASISTENCIA);
-                return;
-                }
-                if (key === "cursos") {
-                navigate(ROUTES.PROFESOR_CURSOS);
-                return;
-                }
-                if (key === "alumnos") { 
-                navigate(ROUTES.PROFESOR_ALUMNOS);
-                return;
-              }
-              if (key === "materias") {
-                navigate(ROUTES.PROFESOR_MATERIAS);
-                return;
-              }
-
-                messageApi.info("Esta función estará disponible próximamente.");
-            }}
-            className="cursos-menu"
-            />
-
-          <div className="cursos-sidebar-bottom">
-            <div className="cursos-ayuda">
-              <Text strong>¿Necesitás ayuda?</Text>
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                Consultá con el administrador del sistema.
-              </Text>
-            </div>
-
-            <Button
-              type="text"
-              icon={<LogoutOutlined />}
-              block
-              style={{ textAlign: "left", color: "#6b6557" }}
-              onClick={cerrarSesion}
-            >
-              Cerrar sesión
-            </Button>
-          </div>
+          {contenidoMenu}
         </Sider>
+
+        <Drawer
+          placement="left"
+          size={260}
+          open={menuAbierto}
+          onClose={() => setMenuAbierto(false)}
+          closable={false}
+          styles={{ body: { padding: 0, display: "flex", flexDirection: "column" } }}
+        >
+          {contenidoMenu}
+        </Drawer>
 
         <Layout style={{ minWidth: 0, background: "#f6f8f6" }}>
           <Header className="cursos-header">

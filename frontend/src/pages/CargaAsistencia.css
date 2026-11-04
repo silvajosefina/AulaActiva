@@ -7,6 +7,10 @@
   border-right: 1px solid #e9e4d8;
 }
 
+.asistencia-sidebar.ant-layout-sider-collapsed {
+  border-right: none;
+}
+
 .asistencia-logo {
   display: flex;
   align-items: center;
@@ -74,6 +78,12 @@
 
 .asistencia-menu-mobile {
   display: none;
+}
+
+@media (max-width: 991px) {
+  .asistencia-menu-mobile {
+    display: inline-flex;
+  }
 }
 
 .asistencia-header-right {
@@ -281,10 +291,6 @@
   .asistencia-header {
     height: 60px;
     padding: 0 16px;
-  }
-
-  .asistencia-menu-mobile {
-    display: inline-flex;
   }
 
   .asistencia-content {
