@@ -7,6 +7,10 @@
   border-right: 1px solid #e9e4d8;
 }
 
+.materias-sidebar.ant-layout-sider-collapsed {
+  border-right: none;
+}
+
 .materias-logo {
   display: flex;
   align-items: center;
@@ -74,6 +78,12 @@
 
 .materias-menu-mobile {
   display: none;
+}
+
+@media (max-width: 991px) {
+  .materias-menu-mobile {
+    display: inline-flex;
+  }
 }
 
 .materias-header-right {
@@ -146,10 +156,6 @@
   .materias-header {
     height: 60px;
     padding: 0 16px;
-  }
-
-  .materias-menu-mobile {
-    display: inline-flex;
   }
 
   .materias-content {

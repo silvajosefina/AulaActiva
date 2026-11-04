@@ -13,6 +13,7 @@ import {
   Space,
   Avatar,
   Dropdown,
+  Drawer,
   ConfigProvider,
   message,
 } from "antd";
@@ -324,6 +325,63 @@ export default function CargaAsistencia() {
     },
   };
 
+  const rutasMenu: Record<string, string> = {
+    inicio: ROUTES.PROFESOR_INICIO,
+    asistencia: ROUTES.PROFESOR_ASISTENCIA,
+    cursos: ROUTES.PROFESOR_CURSOS,
+    alumnos: ROUTES.PROFESOR_ALUMNOS,
+    materias: ROUTES.PROFESOR_MATERIAS,
+  };
+
+  const contenidoMenu = (
+    <>
+      <div className="asistencia-logo">
+        <div className="asistencia-logo-icon">
+          <BookOutlined />
+        </div>
+        <span>AulaActiva</span>
+      </div>
+
+      <Text className="asistencia-menu-label">MENÚ PRINCIPAL</Text>
+
+      <Menu
+        mode="inline"
+        inlineIndent={16}
+        selectedKeys={["asistencia"]}
+        items={opcionesMenu}
+        onClick={({ key }) => {
+          setMenuAbierto(false);
+          const ruta = rutasMenu[key];
+          if (ruta) {
+            navigate(ruta);
+            return;
+          }
+          messageApi.info("Esta función estará disponible próximamente.");
+        }}
+        className="asistencia-menu"
+      />
+
+      <div className="asistencia-sidebar-bottom">
+        <div className="asistencia-ayuda">
+          <Text strong>¿Necesitás ayuda?</Text>
+          <Text type="secondary" style={{ fontSize: 12 }}>
+            Consultá con el administrador del sistema.
+          </Text>
+        </div>
+
+        <Button
+          type="text"
+          icon={<LogoutOutlined />}
+          block
+          style={{ textAlign: "left", color: "#6b6557" }}
+          onClick={cerrarSesion}
+        >
+          Cerrar sesión
+        </Button>
+      </div>
+    </>
+  );
+
   return (
     <ConfigProvider
       locale={locale}
@@ -366,68 +424,20 @@ export default function CargaAsistencia() {
           className="asistencia-sidebar"
           style={{ background: "#fff" }}
         >
-          <div className="asistencia-logo">
-            <div className="asistencia-logo-icon">
-              <BookOutlined />
-            </div>
-            <span>AulaActiva</span>
-          </div>
-
-          <Text className="asistencia-menu-label">
-            MENÚ PRINCIPAL
-          </Text>
-
-          <Menu
-            mode="inline"
-            inlineIndent={16}
-            selectedKeys={["asistencia"]} 
-            items={opcionesMenu}
-            onClick={({ key }) => {
-              if (key === "inicio") {
-                navigate(ROUTES.PROFESOR_INICIO);
-                return;
-              }
-              if (key === "asistencia") {
-                navigate(ROUTES.PROFESOR_ASISTENCIA);
-                return;
-              }
-              if (key === "cursos") {
-                navigate(ROUTES.PROFESOR_CURSOS);
-                return;
-              }
-              if (key === "alumnos") { 
-                navigate(ROUTES.PROFESOR_ALUMNOS);
-                return;
-              }
-              if (key === "materias") {
-                navigate(ROUTES.PROFESOR_MATERIAS);
-                return;
-              }
-
-              messageApi.info("Esta función estará disponible próximamente.");
-            }}
-            className="asistencia-menu"
-          />
-
-          <div className="asistencia-sidebar-bottom">
-            <div className="asistencia-ayuda">
-              <Text strong>¿Necesitás ayuda?</Text>
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                Consultá con el administrador del sistema.
-              </Text>
-            </div>
-
-            <Button
-              type="text"
-              icon={<LogoutOutlined />}
-              block
-              style={{ textAlign: "left", color: "#6b6557" }}
-              onClick={cerrarSesion}
-            >
-              Cerrar sesión
-            </Button>
-          </div>
+          {contenidoMenu}
         </Sider>
+
+        <Drawer
+          placement="left"
+          size={260}
+          open={menuAbierto}
+          onClose={() => setMenuAbierto(false)}
+          closable={false}
+          className="asistencia-drawer"
+          styles={{ body: { padding: 0, display: "flex", flexDirection: "column" } }}
+        >
+          {contenidoMenu}
+        </Drawer>
 
         <Layout style={{ minWidth: 0, background: "#f6f8f6" }}>
           <Header className="asistencia-header">
