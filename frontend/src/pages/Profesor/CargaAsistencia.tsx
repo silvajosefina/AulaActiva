@@ -38,8 +38,8 @@ import {
 import dayjs, { type Dayjs } from "dayjs";
 import "dayjs/locale/es";
 import locale from "antd/locale/es_ES";
-import { clearSession, getSessionUser } from "../services/auth";
-import { ROUTES } from "../constants/routes";
+import { clearSession, getSessionUser } from "../../services/auth";
+import { ROUTES } from "../../constants/routes";
 import "./CargaAsistencia.css";
 
 const { Sider, Header, Content } = Layout;

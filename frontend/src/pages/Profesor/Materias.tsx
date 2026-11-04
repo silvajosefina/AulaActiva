@@ -33,8 +33,8 @@ import {
 } from "@ant-design/icons";
 import "dayjs/locale/es";
 import locale from "antd/locale/es_ES";
-import { clearSession, getSessionUser } from "../services/auth";
-import { ROUTES } from "../constants/routes";
+import { clearSession, getSessionUser } from "../../services/auth";
+import { ROUTES } from "../../constants/routes";
 import "./Materias.css";
 
 const { Sider, Header, Content } = Layout;
