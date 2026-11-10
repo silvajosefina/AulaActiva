@@ -3,16 +3,14 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Alert, Button, Checkbox, Divider, Form, Input, Radio, Typography } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import AuthLayout from '../../components/AuthLayout/AuthLayout'
-import { AuthError, login, saveSession } from '../../services/auth'
+import { AuthError, login, saveSession, type RolUsuario } from '../../services/auth'
 import { ROUTES } from '../../constants/routes'
 import styles from './Login.module.css'
 
 const { Link, Paragraph } = Typography
 
-type RolSeleccionado = 'ALUMNO' | 'DOCENTE'
-
 interface LoginFormValues {
-  rol: RolSeleccionado
+  rol: RolUsuario
   usuario: string
   contrasena: string
   recordarme: boolean
@@ -29,7 +27,7 @@ function Login() {
     setError(null)
     setLoading(true)
     try {
-      const { token, usuario } = await login(values.usuario, values.contrasena)
+      const { token, usuario } = await login(values.usuario, values.contrasena, values.rol)
       saveSession(token, usuario, values.recordarme)
 
       navigate(usuario.rol === 'DOCENTE' ? ROUTES.PROFESOR_INICIO : ROUTES.ALUMNO)
