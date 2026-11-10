@@ -34,13 +34,16 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:4000',
 })
 
-export async function login(usuario: string, contrasena: string): Promise<LoginResult> {
+export async function login(usuario: string, contrasena: string, rol: RolUsuario): Promise<LoginResult> {
   try {
-    const { data } = await api.post<LoginResult>('/auth/login', { usuario, contrasena })
+    const { data } = await api.post<LoginResult>('/auth/login', { usuario, contrasena, rol })
     return data
   } catch (err) {
-    if (axios.isAxiosError<{ message?: string }>(err) && err.response?.status === 401) {
-      throw new AuthError(err.response.data?.message ?? 'Usuario o contraseña incorrectos')
+    if (axios.isAxiosError<{ message?: string }>(err)) {
+      const status = err.response?.status
+      if (status === 400 || status === 401 || status === 403) {
+        throw new AuthError(err.response?.data?.message ?? 'Usuario o contraseña incorrectos')
+      }
     }
     throw err
   }

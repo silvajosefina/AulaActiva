@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
@@ -96,6 +97,8 @@ function estadoDePrueba(indiceAlumno: number, indiceClase: number) {
 }
 
 async function crearUsuariosDePrueba() {
+  const contrasena = await bcrypt.hash('123456', 10)
+
   await prisma.usuario.upsert({
     where: { usuario: 'alumno' },
     update: {},
@@ -104,7 +107,7 @@ async function crearUsuariosDePrueba() {
       apellido: 'Alumna',
       email: 'alumno@aulaactiva.test',
       usuario: 'alumno',
-      contrasena: '123456',
+      contrasena,
       rol: 'ALUMNO',
       alumno: { create: {} },
     },
@@ -118,7 +121,7 @@ async function crearUsuariosDePrueba() {
       apellido: 'Docente',
       email: 'docente@aulaactiva.test',
       usuario: 'docente',
-      contrasena: '123456',
+      contrasena,
       rol: 'DOCENTE',
       docente: { create: {} },
     },
@@ -131,7 +134,7 @@ async function crearUsuariosDePrueba() {
       create: {
         ...alumno,
         email: `${alumno.usuario}@aulaactiva.test`,
-        contrasena: '123456',
+        contrasena,
         rol: 'ALUMNO',
         alumno: { create: {} },
       },

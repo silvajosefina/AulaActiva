@@ -1,22 +1,36 @@
 import type { Request, Response } from 'express'
-import { DuplicateUserError, InvalidCredentialsError, login, register } from '../services/auth.service'
+import {
+  DuplicateUserError,
+  InvalidCredentialsError,
+  login,
+  register,
+  RolIncorrectoError,
+} from '../services/auth.service'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function loginController(req: Request, res: Response) {
-  const { usuario, contrasena } = req.body as { usuario?: string; contrasena?: string }
+  const { usuario, contrasena, rol } = (req.body ?? {}) as { usuario?: unknown; contrasena?: unknown; rol?: unknown }
 
-  if (!usuario || !contrasena) {
+  if (typeof usuario !== 'string' || typeof contrasena !== 'string' || !usuario || !contrasena) {
     res.status(400).json({ message: 'Usuario y contraseña son requeridos' })
+    return
+  }
+  if (rol !== 'DOCENTE' && rol !== 'ALUMNO') {
+    res.status(400).json({ message: 'Elegí si ingresás como Docente o Alumno' })
     return
   }
 
   try {
-    const resultado = await login(usuario, contrasena)
+    const resultado = await login(usuario, contrasena, rol)
     res.status(200).json(resultado)
   } catch (err) {
     if (err instanceof InvalidCredentialsError) {
       res.status(401).json({ message: 'Usuario o contraseña incorrectos' })
+      return
+    }
+    if (err instanceof RolIncorrectoError) {
+      res.status(403).json({ message: err.message })
       return
     }
     console.error(err)

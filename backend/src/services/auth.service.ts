@@ -1,12 +1,28 @@
 import { Prisma } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { env } from '../config/env'
 import { prisma } from '../lib/prisma'
 
 export class InvalidCredentialsError extends Error {}
 export class DuplicateUserError extends Error {}
+export class RolIncorrectoError extends Error {}
 
 type Rol = 'DOCENTE' | 'ALUMNO'
+
+const RONDAS_HASH = 10
+
+export function hashearContrasena(contrasena: string): Promise<string> {
+  return bcrypt.hash(contrasena, RONDAS_HASH)
+}
+
+export function tienePerfilDeRol(
+  usuarioDb: { rol: Rol; docente: object | null; alumno: object | null },
+  rol: Rol,
+): boolean {
+  if (usuarioDb.rol !== rol) return false
+  return rol === 'DOCENTE' ? usuarioDb.docente !== null : usuarioDb.alumno !== null
+}
 
 interface AuthUserDTO {
   id: number
@@ -49,14 +65,20 @@ function toDTO(usuarioDb: UsuarioConPerfil): AuthUserDTO {
   }
 }
 
-export async function login(usuario: string, contrasena: string): Promise<LoginResult> {
+export async function login(usuario: string, contrasena: string, rol: Rol): Promise<LoginResult> {
   const usuarioDb = await prisma.usuario.findUnique({
     where: { usuario },
     include: { docente: true, alumno: true },
   })
 
-  if (!usuarioDb || usuarioDb.contrasena !== contrasena) {
+  if (!usuarioDb || !(await bcrypt.compare(contrasena, usuarioDb.contrasena))) {
     throw new InvalidCredentialsError()
+  }
+
+  if (!tienePerfilDeRol(usuarioDb, rol)) {
+    throw new RolIncorrectoError(
+      rol === 'DOCENTE' ? 'Esta cuenta no pertenece a un docente' : 'Esta cuenta no pertenece a un alumno',
+    )
   }
 
   const token = jwt.sign({ sub: usuarioDb.idUsuario, rol: usuarioDb.rol }, env.jwtSecret, {
@@ -87,7 +109,7 @@ export async function register(datos: RegisterInput): Promise<AuthUserDTO> {
         apellido: datos.apellido,
         email: datos.email,
         usuario: datos.usuario,
-        contrasena: datos.contrasena,
+        contrasena: await hashearContrasena(datos.contrasena),
         rol: datos.rol,
         ...(datos.rol === 'DOCENTE' ? { docente: { create: {} } } : { alumno: { create: {} } }),
       },
