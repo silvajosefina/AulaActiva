@@ -28,6 +28,7 @@ function Login() {
     setLoading(true)
     try {
       const { token, usuario } = await login(values.usuario, values.contrasena, values.rol)
+      
       saveSession(token, usuario, values.recordarme)
 
       navigate(usuario.rol === 'DOCENTE' ? ROUTES.PROFESOR_INICIO : ROUTES.ALUMNO)
