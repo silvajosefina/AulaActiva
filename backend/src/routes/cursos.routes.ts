@@ -1,16 +1,17 @@
-import { Router } from "express";
-import { 
-  obtenerAlumnosPorCurso, 
-  obtenerAsistenciasPorFecha, 
-  guardarAsistencia 
-} from "../controllers/cursos.controller.js";
+import { Router } from 'express'
+import {
+  guardarAsistencia,
+  obtenerAlumnosPorCurso,
+  obtenerAsistenciasPorFecha,
+} from '../controllers/cursos.controller'
+import { requireAuth, requireRol } from '../middlewares/auth.middleware'
 
-const router = Router();
+const router = Router()
 
-router.get("/:id/alumnos", obtenerAlumnosPorCurso);
+router.use(requireAuth, requireRol('DOCENTE'))
 
-router.get("/:id/asistencias", obtenerAsistenciasPorFecha);
+router.get('/:id/alumnos', obtenerAlumnosPorCurso)
+router.get('/:id/asistencias', obtenerAsistenciasPorFecha)
+router.post('/:id/asistencias', guardarAsistencia)
 
-router.post("/:id/asistencias", guardarAsistencia);
-
-export default router;
+export default router

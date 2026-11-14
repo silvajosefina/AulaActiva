@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Layout,
@@ -40,52 +40,55 @@ import "dayjs/locale/es";
 import locale from "antd/locale/es_ES";
 import { clearSession, getSessionUser } from "../../services/auth";
 import { ROUTES } from "../../constants/routes";
+import {
+  obtenerAlumnosPorCurso,
+  obtenerAsistenciasPorFecha,
+  guardarAsistenciaCurso,
+  type RegistroAsistenciaDto,
+} from "../../services/cursosService";
 import "./CargaAsistencia.css";
 
 const { Sider, Header, Content } = Layout;
 const { Title, Text } = Typography;
 
-type EstadoAsistencia = "P" | "A" | "T" | "J";
+type EstadoAsistencia = "PRESENTE" | "AUSENTE" | "TARDANZA" | "JUSTIFICADA" | "SUSPENDIDA";
 
 interface Alumno {
-  id: number;
-  legajo: string;
+  legajoAlumno: number;
+  idCursoAlumno: number;
   nombre: string;
   apellido: string;
+  email: string;
   estado?: EstadoAsistencia;
 }
 
-const alumnosIniciales: Alumno[] = [
-  { id: 1, legajo: "1024", nombre: "Lucía", apellido: "Fernández" },
-  { id: 2, legajo: "1031", nombre: "Mateo", apellido: "González" },
-  { id: 3, legajo: "1045", nombre: "Sofía", apellido: "Martínez" },
-  { id: 4, legajo: "1052", nombre: "Tomás", apellido: "Rodríguez" },
-  { id: 5, legajo: "1068", nombre: "Valentina", apellido: "López" },
-  { id: 6, legajo: "1080", nombre: "Benjamín", apellido: "Díaz" },
-];
-
 const colorEstado: Record<EstadoAsistencia, string> = {
-  P: "success",
-  A: "error",
-  T: "warning",
-  J: "processing",
+  PRESENTE: "success",
+  AUSENTE: "error",
+  TARDANZA: "warning",
+  JUSTIFICADA: "processing",
+  SUSPENDIDA: "default",
 };
 
 const textoEstado: Record<EstadoAsistencia, string> = {
-  P: "Presente",
-  A: "Ausente",
-  T: "Tarde",
-  J: "Justificada",
+  PRESENTE: "Presente",
+  AUSENTE: "Ausente",
+  TARDANZA: "Tarde",
+  JUSTIFICADA: "Justificada",
+  SUSPENDIDA: "Suspendida",
 };
 
 export default function CargaAsistencia() {
   const navigate = useNavigate();
   const usuario = getSessionUser();
-  const [materia, setMateria] = useState("bd");
+  
+  // ID de curso seleccionado (puedes cambiarlo o hacerlo dinámico según tu app)
+  const [idCurso, setIdCurso] = useState<number>(1);
   const [fecha, setFecha] = useState<Dayjs | null>(dayjs());
   const [busqueda, setBusqueda] = useState("");
-  const [alumnos, setAlumnos] = useState<Alumno[]>(alumnosIniciales);
+  const [alumnos, setAlumnos] = useState<Alumno[]>([]);
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [messageApi, contextHolder] = message.useMessage();
 
   const nombreCompleto = usuario
@@ -100,30 +103,64 @@ export default function CargaAsistencia() {
     navigate(ROUTES.LOGIN);
   };
 
-  const presentes = alumnos.filter((a) => a.estado === "P").length;
-  const ausentes = alumnos.filter((a) => a.estado === "A").length;
-  const tarde = alumnos.filter((a) => a.estado === "T").length;
-  const justificadas = alumnos.filter((a) => a.estado === "J").length;
+  // Cargar alumnos y asistencias desde el backend al cambiar de curso o fecha
+  useEffect(() => {
+    const cargarDatosBackend = async () => {
+      try {
+        setLoading(true);
+        const fechaStr = fecha ? fecha.format("YYYY-MM-DD") : dayjs().format("YYYY-MM-DD");
 
+        // 1. Obtenemos los alumnos inscriptos al curso
+        const listaAlumnos = await obtenerAlumnosPorCurso(idCurso);
+
+        // 2. Obtenemos las asistencias ya registradas para esa fecha
+        const asistenciasPrevias = await obtenerAsistenciasPorFecha(idCurso, fechaStr);
+
+        // Mapeamos los estados existentes a los alumnos
+        const mapaAsistencias = new Map<number, EstadoAsistencia>();
+        asistenciasPrevias.forEach((item: any) => {
+          mapaAsistencias.set(item.legajoAlumno, item.estado);
+        });
+
+        const alumnosConEstado: Alumno[] = listaAlumnos.map((alum: any) => ({
+          ...alum,
+          estado: mapaAsistencias.get(alum.legajoAlumno) || undefined,
+        }));
+
+        setAlumnos(alumnosConEstado);
+      } catch (error: any) {
+        console.error(error);
+        messageApi.error(error.response?.data?.message || "Error al cargar los datos del curso.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    cargarDatosBackend();
+  }, [idCurso, fecha]);
+
+  const presentes = alumnos.filter((a) => a.estado === "PRESENTE").length;
+  const ausentes = alumnos.filter((a) => a.estado === "AUSENTE").length;
+  const tarde = alumnos.filter((a) => a.estado === "TARDANZA").length;
+  const justificadas = alumnos.filter((a) => a.estado === "JUSTIFICADA").length;
   const pendientes = alumnos.filter((a) => !a.estado).length;
 
   const alumnosFiltrados = useMemo(() => {
     const texto = busqueda.trim().toLowerCase();
-
     return alumnos.filter((a) =>
-      `${a.nombre} ${a.apellido} ${a.legajo}`
+      `${a.nombre} ${a.apellido} ${a.legajoAlumno}`
         .toLowerCase()
         .includes(texto)
     );
   }, [alumnos, busqueda]);
 
   const actualizarEstado = (
-    id: number,
+    legajoAlumno: number,
     estado: EstadoAsistencia
   ) => {
     setAlumnos((actuales) =>
       actuales.map((a) =>
-        a.id === id ? { ...a, estado } : a
+        a.legajoAlumno === legajoAlumno ? { ...a, estado } : a
       )
     );
   };
@@ -134,34 +171,33 @@ export default function CargaAsistencia() {
     );
   };
 
-  const guardarAsistencia = () => {
-    if (!materia || !fecha) {
-      messageApi.warning("Seleccioná una materia y una fecha.");
+  const guardarAsistencia = async () => {
+    if (!fecha) {
+      messageApi.warning("Seleccioná una fecha.");
       return;
     }
 
     if (pendientes > 0) {
-      messageApi.warning(
-        `Todavía falta registrar a ${pendientes} alumno(s).`
-      );
+      messageApi.warning(`Todavía falta registrar a ${pendientes} alumno(s).`);
       return;
     }
 
-    const registro = {
-      materia,
-      fecha: fecha.format("YYYY-MM-DD"),
-      asistencias: alumnos.map((a) => ({
-        idAlumno: a.id,
-        legajo: a.legajo,
-        estado: a.estado,
-      })),
-    };
+    try {
+      setLoading(true);
+      const fechaStr = fecha.format("YYYY-MM-DD");
+      const registros: RegistroAsistenciaDto[] = alumnos.map((a) => ({
+        legajoAlumno: a.legajoAlumno,
+        estado: a.estado || "PRESENTE",
+      }));
 
-    console.log("Registro de asistencia:", registro);
-
-    messageApi.success(
-      "Validación completada. Falta conectar el guardado con el backend."
-    );
+      await guardarAsistenciaCurso(idCurso, fechaStr, registros);
+      messageApi.success("¡Asistencia guardada correctamente en el servidor!");
+    } catch (error: any) {
+      console.error(error);
+      messageApi.error(error.response?.data?.message || "Hubo un error al guardar la asistencia.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const columnas: ColumnsType<Alumno> = [
@@ -182,36 +218,35 @@ export default function CargaAsistencia() {
             {alumno.nombre[0]}
             {alumno.apellido[0]}
           </Avatar>
-
           <div>
             <Text strong style={{ color: "#26211a" }}>
               {alumno.nombre} {alumno.apellido}
             </Text>
             <br />
             <Text style={{ color: "#9a9284", fontSize: 12 }}>
-              Legajo {alumno.legajo}
+              Legajo {alumno.legajoAlumno}
             </Text>
           </div>
         </Space>
       ),
     },
-{
+    {
       title: "ESTADO DE ASISTENCIA",
       key: "estado",
-      width: 480,
+      width: 520,
       render: (_, alumno) => {
         const estiloBoton = (valor: EstadoAsistencia) => {
           const seleccionado = alumno.estado === valor;
-          
           let colorSeleccionadoBg = "#f5f5f5";
           let colorSeleccionadoTexto = "#595959";
           let colorBorde = "#d9d9d9";
 
           if (seleccionado) {
-            if (valor === "P") { colorSeleccionadoBg = "#f6ffed"; colorSeleccionadoTexto = "#52c41a"; colorBorde = "#b7eb8f"; }
-            if (valor === "A") { colorSeleccionadoBg = "#fff2f0"; colorSeleccionadoTexto = "#ff4d4f"; colorBorde = "#ffccc7"; }
-            if (valor === "T") { colorSeleccionadoBg = "#fff7e6"; colorSeleccionadoTexto = "#fa8c16"; colorBorde = "#ffd591"; }
-            if (valor === "J") { colorSeleccionadoBg = "#e6f7ff"; colorSeleccionadoTexto = "#1890ff"; colorBorde = "#91caff"; }
+            if (valor === "PRESENTE") { colorSeleccionadoBg = "#f6ffed"; colorSeleccionadoTexto = "#52c41a"; colorBorde = "#b7eb8f"; }
+            if (valor === "AUSENTE") { colorSeleccionadoBg = "#fff2f0"; colorSeleccionadoTexto = "#ff4d4f"; colorBorde = "#ffccc7"; }
+            if (valor === "TARDANZA") { colorSeleccionadoBg = "#fff7e6"; colorSeleccionadoTexto = "#fa8c16"; colorBorde = "#ffd591"; }
+            if (valor === "JUSTIFICADA") { colorSeleccionadoBg = "#e6f7ff"; colorSeleccionadoTexto = "#1890ff"; colorBorde = "#91caff"; }
+            if (valor === "SUSPENDIDA") { colorSeleccionadoBg = "#f0f0f0"; colorSeleccionadoTexto = "#595959"; colorBorde = "#d9d9d9"; }
           }
 
           return {
@@ -225,29 +260,17 @@ export default function CargaAsistencia() {
 
         return (
           <Space size={4}>
-            <Button
-              style={estiloBoton("P")}
-              onClick={() => actualizarEstado(alumno.id, "P")}
-            >
-              <CheckCircleFilled style={{ color: alumno.estado === "P" ? "#52c41a" : undefined }} /> P
+            <Button style={estiloBoton("PRESENTE")} onClick={() => actualizarEstado(alumno.legajoAlumno, "PRESENTE")}>
+              <CheckCircleFilled style={{ color: alumno.estado === "PRESENTE" ? "#52c41a" : undefined }} /> P
             </Button>
-            <Button
-              style={estiloBoton("A")}
-              onClick={() => actualizarEstado(alumno.id, "A")}
-            >
-              <CloseCircleOutlined style={{ color: alumno.estado === "A" ? "#ff4d4f" : undefined }} /> A
+            <Button style={estiloBoton("AUSENTE")} onClick={() => actualizarEstado(alumno.legajoAlumno, "AUSENTE")}>
+              <CloseCircleOutlined style={{ color: alumno.estado === "AUSENTE" ? "#ff4d4f" : undefined }} /> A
             </Button>
-            <Button
-              style={estiloBoton("T")}
-              onClick={() => actualizarEstado(alumno.id, "T")}
-            >
-              <ClockCircleOutlined style={{ color: alumno.estado === "T" ? "#fa8c16" : undefined }} /> T
+            <Button style={estiloBoton("TARDANZA")} onClick={() => actualizarEstado(alumno.legajoAlumno, "TARDANZA")}>
+              <ClockCircleOutlined style={{ color: alumno.estado === "TARDANZA" ? "#fa8c16" : undefined }} /> T
             </Button>
-            <Button
-              style={estiloBoton("J")}
-              onClick={() => actualizarEstado(alumno.id, "J")}
-            >
-              <InfoCircleOutlined style={{ color: alumno.estado === "J" ? "#1890ff" : undefined }} /> J
+            <Button style={estiloBoton("JUSTIFICADA")} onClick={() => actualizarEstado(alumno.legajoAlumno, "JUSTIFICADA")}>
+              <InfoCircleOutlined style={{ color: alumno.estado === "JUSTIFICADA" ? "#1890ff" : undefined }} /> J
             </Button>
           </Space>
         );
@@ -261,60 +284,29 @@ export default function CargaAsistencia() {
       render: (_, alumno) =>
         alumno.estado ? (
           <Tag
-            variant="filled"
             color={colorEstado[alumno.estado]}
             style={{ borderRadius: 6, padding: "4px 10px" }}
           >
             {textoEstado[alumno.estado]}
           </Tag>
         ) : (
-          <Text style={{ color: "#a2a9a3", fontSize: 12 }}>
-            Pendiente
-          </Text>
+          <Text style={{ color: "#a2a9a3", fontSize: 12 }}>Pendiente</Text>
         ),
     },
   ];
 
   const opcionesMenu = [
-    {
-      key: "inicio",
-      icon: <HomeOutlined />,
-      label: "Inicio",
-    },
-    {
-      key: "cursos",
-      icon: <ReadOutlined />,
-      label: "Mis cursos",
-    },
-    {
-      key: "asistencia",
-      icon: <CalendarOutlined />,
-      label: "Cargar asistencia",
-    },
-    {
-      key: "alumnos",
-      icon: <TeamOutlined />,
-      label: "Mis alumnos",
-    },
-    {
-      key: "materias",
-      icon: <BookOutlined />,
-      label: "Materias",
-    },
+    { key: "inicio", icon: <HomeOutlined />, label: "Inicio" },
+    { key: "cursos", icon: <ReadOutlined />, label: "Mis cursos" },
+    { key: "asistencia", icon: <CalendarOutlined />, label: "Cargar asistencia" },
+    { key: "alumnos", icon: <TeamOutlined />, label: "Mis alumnos" },
+    { key: "materias", icon: <BookOutlined />, label: "Materias" },
   ];
 
   const menuUsuario = {
     items: [
-      {
-        key: "perfil",
-        label: "Mi perfil",
-        icon: <UserOutlined />,
-      },
-      {
-        key: "salir",
-        label: "Cerrar sesión",
-        icon: <LogoutOutlined />,
-      },
+      { key: "perfil", label: "Mi perfil", icon: <UserOutlined /> },
+      { key: "salir", label: "Cerrar sesión", icon: <LogoutOutlined /> },
     ],
     onClick: ({ key }: { key: string }) => {
       if (key === "salir") {
@@ -392,23 +384,8 @@ export default function CargaAsistencia() {
           colorText: "#26211a",
           colorTextSecondary: "#8d8676",
           borderRadius: 10,
-          fontFamily:
-            "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
           controlHeight: 40,
-        },
-        components: {
-          Menu: {
-            itemSelectedBg: "#f1e4cd",
-            itemSelectedColor: "#8a6530",
-            itemColor: "#6b6557",
-            itemBorderRadius: 9,
-          },
-          Table: {
-            headerBg: "#f8f6f1",
-            headerColor: "#8d8676",
-            rowHoverBg: "#f8f6f1",
-            borderColor: "#f0ece0",
-          },
         },
       }}
     >
@@ -449,15 +426,9 @@ export default function CargaAsistencia() {
             />
 
             <div className="asistencia-header-right">
-              <Avatar
-                style={{
-                  background: "#f1e4cd",
-                  color: "#8a6530",
-                }}
-              >
+              <Avatar style={{ background: "#f1e4cd", color: "#8a6530" }}>
                 {iniciales}
               </Avatar>
-
               <div>
                 <Text strong style={{ display: "block" }}>
                   {nombreCompleto}
@@ -466,7 +437,6 @@ export default function CargaAsistencia() {
                   Docente
                 </Text>
               </div>
-
               <Dropdown menu={menuUsuario} trigger={["click"]}>
                 <Button type="text" icon={<DownOutlined />} />
               </Dropdown>
@@ -476,14 +446,11 @@ export default function CargaAsistencia() {
           <Content className="asistencia-content">
             <div className="asistencia-titulo">
               <Text className="asistencia-migas">
-                Inicio / Mis cursos /{" "}
-                <span>Cargar asistencia</span>
+                Inicio / Mis cursos / <span>Cargar asistencia</span>
               </Text>
-
               <Title level={2} style={{ margin: "12px 0 4px" }}>
                 Cargar asistencia
               </Title>
-
               <Text type="secondary">
                 Registrá la asistencia de los alumnos de tu cursada.
               </Text>
@@ -491,21 +458,14 @@ export default function CargaAsistencia() {
 
             <section className="asistencia-filtros">
               <div className="asistencia-campo">
-                <Text strong>Materia</Text>
+                <Text strong>Curso (ID)</Text>
                 <Select
-                  value={materia}
-                  onChange={setMateria}
+                  value={idCurso}
+                  onChange={setIdCurso}
                   style={{ width: "100%", marginTop: 8 }}
                   options={[
-                    { value: "bd", label: "Bases de Datos" },
-                    {
-                      value: "programacion",
-                      label: "Programación",
-                    },
-                    {
-                      value: "matematica",
-                      label: "Matemática",
-                    },
+                    { value: 1, label: "Curso 1 (Base de Datos)" },
+                    { value: 2, label: "Curso 2 (Programación)" },
                   ]}
                   suffixIcon={<BookOutlined />}
                 />
@@ -528,6 +488,7 @@ export default function CargaAsistencia() {
                 icon={<SaveOutlined />}
                 className="asistencia-guardar-top"
                 onClick={guardarAsistencia}
+                loading={loading}
               >
                 Guardar asistencia
               </Button>
@@ -535,9 +496,7 @@ export default function CargaAsistencia() {
 
             <div className="asistencia-resumen">
               <div className="asistencia-resumen-item">
-                <div className="asistencia-resumen-icon neutro">
-                  <TeamOutlined />
-                </div>
+                <div className="asistencia-resumen-icon neutro"><TeamOutlined /></div>
                 <div>
                   <Text type="secondary">Total de alumnos</Text>
                   <Title level={3} style={{ margin: 0 }}>{alumnos.length}</Title>
@@ -545,50 +504,34 @@ export default function CargaAsistencia() {
               </div>
 
               <div className="asistencia-resumen-item">
-                <div className="asistencia-resumen-icon verde">
-                  <CheckCircleFilled />
-                </div>
+                <div className="asistencia-resumen-icon verde"><CheckCircleFilled /></div>
                 <div>
                   <Text type="secondary">Presentes (P)</Text>
-                  <Title level={3} style={{ margin: 0, color: "#39805a" }}>
-                    {presentes}
-                  </Title>
+                  <Title level={3} style={{ margin: 0, color: "#39805a" }}>{presentes}</Title>
                 </div>
               </div>
 
               <div className="asistencia-resumen-item">
-                <div className="asistencia-resumen-icon rojo">
-                  <CloseCircleOutlined />
-                </div>
+                <div className="asistencia-resumen-icon rojo"><CloseCircleOutlined /></div>
                 <div>
                   <Text type="secondary">Ausentes (A)</Text>
-                  <Title level={3} style={{ margin: 0, color: "#d75b57" }}>
-                    {ausentes}
-                  </Title>
+                  <Title level={3} style={{ margin: 0, color: "#d75b57" }}>{ausentes}</Title>
                 </div>
               </div>
 
               <div className="asistencia-resumen-item">
-                <div className="asistencia-resumen-icon amarillo">
-                  <ClockCircleOutlined />
-                </div>
+                <div className="asistencia-resumen-icon amarillo"><ClockCircleOutlined /></div>
                 <div>
                   <Text type="secondary">Llegadas tarde (T)</Text>
-                  <Title level={3} style={{ margin: 0, color: "#c48a28" }}>
-                    {tarde}
-                  </Title>
+                  <Title level={3} style={{ margin: 0, color: "#c48a28" }}>{tarde}</Title>
                 </div>
               </div>
 
               <div className="asistencia-resumen-item">
-                <div className="asistencia-resumen-icon azul" style={{ color: "#1677ff", background: "#e6f4ff" }}>
-                  <InfoCircleOutlined />
-                </div>
+                <div className="asistencia-resumen-icon azul" style={{ color: "#1677ff", background: "#e6f4ff" }}><InfoCircleOutlined /></div>
                 <div>
                   <Text type="secondary">Justificadas (J)</Text>
-                  <Title level={3} style={{ margin: 0, color: "#1677ff" }}>
-                    {justificadas}
-                  </Title>
+                  <Title level={3} style={{ margin: 0, color: "#1677ff" }}>{justificadas}</Title>
                 </div>
               </div>
             </div>
@@ -596,12 +539,8 @@ export default function CargaAsistencia() {
             <section className="asistencia-tabla">
               <div className="asistencia-tabla-header">
                 <div>
-                  <Title level={4} style={{ margin: 0 }}>
-                    Lista de alumnos
-                  </Title>
-                  <Text type="secondary">
-                    Seleccioná el estado de cada alumno.
-                  </Text>
+                  <Title level={4} style={{ margin: 0 }}>Lista de alumnos</Title>
+                  <Text type="secondary">Seleccioná el estado de cada alumno.</Text>
                 </div>
 
                 <Space wrap>
@@ -617,25 +556,12 @@ export default function CargaAsistencia() {
                   <Dropdown
                     menu={{
                       items: [
-                        {
-                          key: "P",
-                          label: "Todos Presentes (P)",
-                        },
-                        {
-                          key: "A",
-                          label: "Todos Ausentes (A)",
-                        },
-                        {
-                          key: "T",
-                          label: "Todos Tarde (T)",
-                        },
-                        {
-                          key: "J",
-                          label: "Todos Justificados (J)",
-                        },
+                        { key: "PRESENTE", label: "Todos Presentes (P)" },
+                        { key: "AUSENTE", label: "Todos Ausentes (A)" },
+                        { key: "TARDANZA", label: "Todos Tarde (T)" },
+                        { key: "JUSTIFICADA", label: "Todos Justificados (J)" },
                       ],
-                      onClick: ({ key }) =>
-                        marcarTodos(key as EstadoAsistencia),
+                      onClick: ({ key }) => marcarTodos(key as EstadoAsistencia),
                     }}
                     trigger={["click"]}
                   >
@@ -647,27 +573,26 @@ export default function CargaAsistencia() {
               </div>
 
               <Table<Alumno>
-                rowKey="id"
+                rowKey="legajoAlumno"
                 columns={columnas}
                 dataSource={alumnosFiltrados}
                 pagination={false}
                 scroll={{ x: 850 }}
                 className="asistencia-table"
-                locale={{
-                  emptyText: "No se encontraron alumnos.",
-                }}
+                loading={loading}
+                locale={{ emptyText: "No se encontraron alumnos inscriptos en este curso." }}
               />
 
               <div className="asistencia-pie-tabla">
                 <Text type="secondary">
-                  {alumnos.length} alumnos · {pendientes} pendientes de
-                  registrar
+                  {alumnos.length} alumnos · {pendientes} pendientes de registrar
                 </Text>
 
                 <Button
                   type="primary"
                   icon={<SaveOutlined />}
                   onClick={guardarAsistencia}
+                  loading={loading}
                 >
                   Guardar asistencia
                 </Button>
@@ -680,7 +605,6 @@ export default function CargaAsistencia() {
           </Content>
         </Layout>
       </Layout>
-
     </ConfigProvider>
   );
 }
