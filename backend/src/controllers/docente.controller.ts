@@ -3,6 +3,8 @@ import {
   DocenteNoEncontradoError,
   listarCursosDelDocente,
   listarMateriasDelDocente,
+  obtenerPerfilDelDocente,
+  actualizarPasswordDocente,
 } from '../services/docente.service'
 
 function responderError(res: Response, err: unknown) {
@@ -28,6 +30,33 @@ export async function materiasController(req: Request, res: Response) {
     const materias = await listarMateriasDelDocente(req.usuario!.idUsuario)
     res.status(200).json({ materias })
   } catch (err) {
+    responderError(res, err)
+  }
+}
+
+export async function perfilController(req: Request, res: Response) {
+  try {
+    const perfil = await obtenerPerfilDelDocente(req.usuario!.idUsuario)
+    res.status(200).json(perfil)
+  } catch (err) {
+    responderError(res, err)
+  }
+}
+
+export async function actualizarPasswordController(req: Request, res: Response) {
+  try {
+    const { actual, nueva } = req.body
+
+    if (!actual || !nueva) {
+      return res.status(400).json({ message: 'La contraseña actual y la nueva son obligatorias' })
+    }
+
+    await actualizarPasswordDocente(req.usuario!.idUsuario, actual, nueva)
+    res.status(200).json({ message: 'Contraseña actualizada con éxito' })
+  } catch (err: any) {
+    if (err.message === 'La contraseña actual es incorrecta') {
+      return res.status(400).json({ message: err.message })
+    }
     responderError(res, err)
   }
 }
