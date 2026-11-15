@@ -135,13 +135,19 @@ export default function MisCursos() {
     { key: "materias", icon: <BookOutlined />, label: "Materias" },
   ];
 
-  const menuUsuario = {
+const menuUsuario = {
     items: [
       { key: "perfil", label: "Mi perfil", icon: <UserOutlined /> },
       { key: "salir", label: "Cerrar sesión", icon: <LogoutOutlined /> },
     ],
     onClick: ({ key }: { key: string }) => {
-      if (key === "salir") cerrarSesion();
+      if (key === "salir") {
+        cerrarSesion();
+        return;
+      }
+      if (key === "perfil") {
+        navigate("/profesor/perfil");
+      }
     },
   };
 

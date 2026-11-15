@@ -1,4 +1,5 @@
 import { prisma } from '../lib/prisma'
+import bcrypt from 'bcrypt'
 
 export class DocenteNoEncontradoError extends Error {}
 
@@ -39,6 +40,14 @@ export interface MateriaDocenteDTO {
     periodo: string
   }[]
   horasSemanales: number
+}
+
+export interface PerfilDocenteDTO {
+  nombre: string
+  apellido: string
+  email: string
+  rol: string
+  legajo: number
 }
 
 function formatearHora(hora: Date): string {
@@ -151,5 +160,47 @@ export async function listarMateriasDelDocente(idUsuario: number): Promise<Mater
       })),
       horasSemanales: Math.round((Math.max(0, ...minutosPorCurso) / 60) * 10) / 10,
     }
+  })
+}
+
+export async function obtenerPerfilDelDocente(idUsuario: number): Promise<PerfilDocenteDTO> {
+  const docente = await prisma.docente.findUnique({
+    where: { idUsuario },
+    include: { usuario: true },
+  })
+
+  if (!docente || !docente.usuario) {
+    throw new DocenteNoEncontradoError()
+  }
+
+  return {
+    nombre: docente.usuario.nombre,
+    apellido: docente.usuario.apellido,
+    email: docente.usuario.email,
+    rol: docente.usuario.rol,
+    legajo: docente.legajoDocente,
+  }
+}
+
+export async function actualizarPasswordDocente(idUsuario: number, actual: string, nueva: string) {
+  const usuario = await prisma.usuario.findUnique({
+    where: { idUsuario },
+  })
+
+  if (!usuario) {
+    throw new Error('Usuario no encontrado')
+  }
+
+  const passwordValida = await bcrypt.compare(actual, usuario.contrasena)
+  if (!passwordValida) {
+    throw new Error('La contraseña actual es incorrecta')
+  }
+
+  const salt = await bcrypt.genSalt(10)
+  const passwordHashed = await bcrypt.hash(nueva, salt)
+
+  await prisma.usuario.update({
+    where: { idUsuario },
+    data: { contrasena: passwordHashed },
   })
 }

@@ -303,7 +303,7 @@ export default function CargaAsistencia() {
     { key: "materias", icon: <BookOutlined />, label: "Materias" },
   ];
 
-  const menuUsuario = {
+const menuUsuario = {
     items: [
       { key: "perfil", label: "Mi perfil", icon: <UserOutlined /> },
       { key: "salir", label: "Cerrar sesión", icon: <LogoutOutlined /> },
@@ -311,6 +311,10 @@ export default function CargaAsistencia() {
     onClick: ({ key }: { key: string }) => {
       if (key === "salir") {
         cerrarSesion();
+        return;
+      }
+      if (key === "perfil") {
+        navigate("/profesor/perfil");
         return;
       }
       messageApi.info("Esta función estará disponible próximamente.");

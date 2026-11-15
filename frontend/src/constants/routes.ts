@@ -9,6 +9,7 @@ export const ROUTES = {
   PROFESOR_CURSOS: '/profesor/cursos',
   PROFESOR_ALUMNOS: '/profesor/alumnos',
   PROFESOR_MATERIAS: '/profesor/materias',
+  PROFESOR_PERFIL: '/profesor/perfil',
   ALUMNO: '/alumno',
   ALUMNO_ASISTENCIAS: '/alumno/asistencias',
   ALUMNO_CURSOS: '/alumno/cursos',

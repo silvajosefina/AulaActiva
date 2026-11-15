@@ -8,6 +8,7 @@ import InicioProfesor from '../pages/Profesor/InicioProfesor'
 import MisCursos from '../pages/Profesor/MisCursos'
 import MisAlumnos from '../pages/Profesor/MisAlumnos'
 import Materias from '../pages/Profesor/Materias'
+import PerfilDocente from '../pages/Profesor/PerfilDocente'
 import PanelAlumno from '../pages/Alumno/PanelAlumno'
 import MisAsistencias from '../pages/Alumno/MisAsistencias'
 import MisCursosAlumno from '../pages/Alumno/MisCursos'
@@ -22,6 +23,7 @@ function AppRouter() {
       <Route path={ROUTES.REGISTRO} element={<Registro />} />
       <Route path={ROUTES.RECUPERAR_CONTRASENA} element={<RecuperarContrasena />} />
 
+      {/* Rutas de Profesor */}
       <Route
         path={ROUTES.PROFESOR_INICIO}
         element={
@@ -62,7 +64,16 @@ function AppRouter() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path={ROUTES.PROFESOR_PERFIL}
+        element={
+          <ProtectedRoute rolRequerido="DOCENTE">
+            <PerfilDocente />
+          </ProtectedRoute>
+        }
+      />
 
+      {/* Rutas de Alumno */}
       <Route
         path={ROUTES.ALUMNO}
         element={
