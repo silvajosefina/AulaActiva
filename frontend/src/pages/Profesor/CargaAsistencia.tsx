@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { getCursosDocente, type CursoDocente } from "../../services/docenteService";
 import {
   Layout,
   Menu,
@@ -82,8 +83,16 @@ export default function CargaAsistencia() {
   const navigate = useNavigate();
   const usuario = getSessionUser();
   
-  // ID de curso seleccionado (puedes cambiarlo o hacerlo dinámico según tu app)
-  const [idCurso, setIdCurso] = useState<number>(1);
+  const location = useLocation();
+  const [idCurso, setIdCurso] = useState<number>(() => {
+    const state = location.state as { comisionId?: string };
+    if (state?.comisionId) {
+      const parsed = Number(state.comisionId);
+      return isNaN(parsed) ? 1 : parsed;
+    }
+    return 1;
+  });
+  const [cursosDocente, setCursosDocente] = useState<CursoDocente[]>([]);
   const [fecha, setFecha] = useState<Dayjs | null>(dayjs());
   const [busqueda, setBusqueda] = useState("");
   const [alumnos, setAlumnos] = useState<Alumno[]>([]);
@@ -102,6 +111,15 @@ export default function CargaAsistencia() {
     clearSession();
     navigate(ROUTES.LOGIN);
   };
+  useEffect(() => {
+    getCursosDocente()
+      .then((data) => {
+        setCursosDocente(data);
+      })
+      .catch((err) => {
+        console.error("No se pudieron cargar los cursos del docente", err);
+      });
+  }, []);
 
   // Cargar alumnos y asistencias desde el backend al cambiar de curso o fecha
   useEffect(() => {
@@ -467,11 +485,12 @@ const menuUsuario = {
                   value={idCurso}
                   onChange={setIdCurso}
                   style={{ width: "100%", marginTop: 8 }}
-                  options={[
-                    { value: 1, label: "Curso 1 (Base de Datos)" },
-                    { value: 2, label: "Curso 2 (Programación)" },
-                  ]}
+                  options={cursosDocente.map((curso) => ({
+                    value: curso.idCurso,
+                    label: `${curso.materia.nombre} - Comisión ${curso.comision} (${curso.periodo} ${curso.anio})`,
+                  }))}
                   suffixIcon={<BookOutlined />}
+                  placeholder="Seleccioná un curso"
                 />
               </div>
 
