@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Layout,
@@ -17,6 +17,7 @@ import {
   Badge,
   message,
   Drawer,
+  Spin,
 } from "antd";
 import {
   HomeOutlined,
@@ -35,96 +36,60 @@ import {
 import "dayjs/locale/es";
 import locale from "antd/locale/es_ES";
 import { clearSession, getSessionUser } from "../../services/auth";
+import { getCursosDocente } from "../../services/docenteService";
+import type { CursoDocente } from "../../services/docenteService";
 import { ROUTES } from "../../constants/routes";
 import "./MisCursos.css";
 
-const { Sider, Header, Content } = Layout;
+const { Header, Content, Sider } = Layout;
 const { Title, Text } = Typography;
-
-interface Curso {
-  id: string;
-  materia: string;
-  comision: string;
-  cuatrimestre: string;
-  horario: string;
-  aula: string;
-  cantAlumnos: number;
-  asistenciasPendientes: number;
-}
-
-const cursosMock: Curso[] = [
-  {
-    id: "bd-1k1",
-    materia: "Bases de Datos",
-    comision: "Comisión 1K1",
-    cuatrimestre: "1º Cuatrimestre",
-    horario: "Lunes y Miércoles 18:00 - 21:00 hs",
-    aula: "Aula 302",
-    cantAlumnos: 32,
-    asistenciasPendientes: 1,
-  },
-  {
-    id: "prog-2k1",
-    materia: "Programación Web",
-    comision: "Comisión 2K1",
-    cuatrimestre: "1º Cuatrimestre",
-    horario: "Martes y Jueves 14:00 - 17:00 hs",
-    aula: "Lab Computación 2",
-    cantAlumnos: 28,
-    asistenciasPendientes: 1,
-  },
-  {
-    id: "mat-101",
-    materia: "Matemática Discreta",
-    comision: "Comisión 101",
-    cuatrimestre: "Annual",
-    horario: "Jueves 08:00 - 11:00 hs",
-    aula: "Aula 105",
-    cantAlumnos: 35,
-    asistenciasPendientes: 0,
-  },
-  {
-    id: "bd-2k2",
-    materia: "Bases de Datos",
-    comision: "Comisión 2K2",
-    cuatrimestre: "2º Cuatrimestre",
-    horario: "Viernes 18:00 - 22:00 hs",
-    aula: "Aula 204",
-    cantAlumnos: 30,
-    asistenciasPendientes: 0,
-  },
-];
 
 export default function MisCursos() {
   const navigate = useNavigate();
   const usuario = getSessionUser();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [busqueda, setBusqueda] = useState("");
+  const [cursos, setCursos] = useState<CursoDocente[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [messageApi, contextHolder] = message.useMessage();
 
   const nombreCompleto = usuario
     ? `${usuario.nombre} ${usuario.apellido}`
-    : "Fernández";
+    : "Docente";
   const iniciales = usuario
     ? `${usuario.nombre[0]}${usuario.apellido[0]}`
-    : "PF";
+    : "DF";
+
+  useEffect(() => {
+    getCursosDocente()
+      .then((data) => {
+        setCursos(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        messageApi.error("No se pudieron cargar los cursos asignados.");
+        setLoading(false);
+      });
+  }, [messageApi]);
 
   const cerrarSesion = () => {
     clearSession();
     navigate(ROUTES.LOGIN);
   };
 
-  const irACargarAsistencia = (comisionId: string) => {
+  const irACargarAsistencia = (idCurso: number) => {
     navigate(ROUTES.PROFESOR_ASISTENCIA, {
-      state: { comisionId },
+      state: { comisionId: idCurso.toString() },
     });
   };
 
-  const cursosFiltrados = cursosMock.filter(
+  const cursosFiltrados = cursos.filter(
     (curso) =>
-      curso.materia.toLowerCase().includes(busqueda.toLowerCase()) ||
-      curso.comision.toLowerCase().includes(busqueda.toLowerCase())
+      curso.materia.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+      curso.comision.toLowerCase().includes(busqueda.toLowerCase()) ||
+      curso.materia.carrera.toLowerCase().includes(busqueda.toLowerCase())
   );
 
   const opcionesMenu = [
@@ -135,7 +100,7 @@ export default function MisCursos() {
     { key: "materias", icon: <BookOutlined />, label: "Materias" },
   ];
 
-const menuUsuario = {
+  const menuUsuario = {
     items: [
       { key: "perfil", label: "Mi perfil", icon: <UserOutlined /> },
       { key: "salir", label: "Cerrar sesión", icon: <LogoutOutlined /> },
@@ -308,92 +273,106 @@ const menuUsuario = {
               </div>
             </div>
 
-            <Row gutter={[20, 20]}>
-              {cursosFiltrados.map((curso) => (
-                <Col xs={24} md={12} lg={12} key={curso.id}>
-                  <Card className="curso-card" variant="borderless">
-                    <div className="curso-card-header">
-                      <div>
-                        <Tag color="gold" style={{ borderRadius: 6, marginBottom: 6 }}>
-                          {curso.cuatrimestre}
-                        </Tag>
-                        <Title level={4} style={{ margin: 0, color: "#26211a" }}>
-                          {curso.materia}
-                        </Title>
-                        <Text strong style={{ color: "#8a6530", fontSize: 13 }}>
-                          {curso.comision}
-                        </Text>
-                      </div>
+            {loading ? (
+              <div style={{ textAlign: "center", padding: "60px 0" }}>
+                <Spin size="large" />
+              </div>
+            ) : (
+              <Row gutter={[20, 20]}>
+                {cursosFiltrados.map((curso) => {
+                  const horarioTexto = curso.horarios.length > 0
+                    ? curso.horarios.map(h => `${h.dia} ${h.horaInicio} - ${h.horaFin} hs`).join(" | ")
+                    : "Horario a coordinar";
 
-                      {curso.asistenciasPendientes > 0 && (
-                        <Badge
-                          count="Asistencia pendiente"
-                          style={{
-                            backgroundColor: "#fbf1e0",
-                            color: "#bc9150",
-                            fontWeight: 600,
-                            borderRadius: 6,
-                            border: "1px solid #e5d4b8",
-                            boxShadow: "none",
-                          }}
-                        />
-                      )}
-                    </div>
+                  const pendienteAsistencia = curso.tieneClaseHoy && !curso.asistenciaHoyCargada;
 
-                    <div className="curso-card-body">
-                      <Space orientation="vertical" size={8} style={{ width: "100%" }}>
-                        <div className="curso-info-item">
-                          <ClockCircleOutlined className="curso-info-icon" />
-                          <Text style={{ fontSize: 13 }}>{curso.horario}</Text>
+                  return (
+                    <Col xs={24} md={12} lg={12} key={curso.idCurso}>
+                      <Card className="curso-card" variant="borderless">
+                        <div className="curso-card-header">
+                          <div>
+                            <Tag color="gold" style={{ borderRadius: 6, marginBottom: 6 }}>
+                              {curso.periodo} ({curso.anio})
+                            </Tag>
+                            <Title level={4} style={{ margin: 0, color: "#26211a" }}>
+                              {curso.materia.nombre}
+                            </Title>
+                            <Text strong style={{ color: "#8a6530", fontSize: 13 }}>
+                              Comisión {curso.comision}
+                            </Text>
+                          </div>
+
+                          {pendienteAsistencia && (
+                            <Badge
+                              count="Asistencia pendiente"
+                              style={{
+                                backgroundColor: "#fbf1e0",
+                                color: "#bc9150",
+                                fontWeight: 600,
+                                borderRadius: 6,
+                                border: "1px solid #e5d4b8",
+                                boxShadow: "none",
+                              }}
+                            />
+                          )}
                         </div>
-                        <div className="curso-info-item">
-                          <EnvironmentOutlined className="curso-info-icon" />
-                          <Text style={{ fontSize: 13 }}>{curso.aula}</Text>
-                        </div>
-                        <div className="curso-info-item">
-                          <TeamOutlined className="curso-info-icon" />
-                          <Text style={{ fontSize: 13 }}>
-                            {curso.cantAlumnos} Alumnos inscriptos
-                          </Text>
-                        </div>
-                      </Space>
-                    </div>
 
-                    <div className="curso-card-footer">
-                      <Button
-                        type="default"
-                        size="middle"
-                        onClick={() =>
-                          messageApi.info("Lista de alumnos disponible próximamente.")
-                        }
-                        style={{ borderRadius: 8 }}
-                      >
-                        Ver alumnos
-                      </Button>
-                      <Button
-                        type="primary"
-                        size="middle"
-                        icon={<CalendarOutlined />}
-                        onClick={() => irACargarAsistencia(curso.id)}
-                        style={{ borderRadius: 8 }}
-                      >
-                        Cargar Asistencia
-                      </Button>
-                    </div>
-                  </Card>
-                </Col>
-              ))}
+                        <div className="curso-card-body">
+                          <Space orientation="vertical" size={8} style={{ width: "100%" }}>
+                            <div className="curso-info-item">
+                              <ClockCircleOutlined className="curso-info-icon" />
+                              <Text style={{ fontSize: 13 }}>{horarioTexto}</Text>
+                            </div>
+                            <div className="curso-info-item">
+                              <EnvironmentOutlined className="curso-info-icon" />
+                              <Text style={{ fontSize: 13 }}>{curso.materia.carrera}</Text>
+                            </div>
+                            <div className="curso-info-item">
+                              <TeamOutlined className="curso-info-icon" />
+                              <Text style={{ fontSize: 13 }}>
+                                {curso.cantidadAlumnos} Alumnos inscriptos
+                              </Text>
+                            </div>
+                          </Space>
+                        </div>
 
-              {cursosFiltrados.length === 0 && (
-                <Col xs={24}>
-                  <div className="cursos-empty">
-                    <Text type="secondary">
-                      No se encontraron cursos que coincidan con la búsqueda.
-                    </Text>
-                  </div>
-                </Col>
-              )}
-            </Row>
+                        <div className="curso-card-footer">
+                          <Button
+                            type="default"
+                            size="middle"
+                            onClick={() =>
+                              messageApi.info("Lista de alumnos disponible próximamente.")
+                            }
+                            style={{ borderRadius: 8 }}
+                          >
+                            Ver alumnos
+                          </Button>
+                          <Button
+                            type="primary"
+                            size="middle"
+                            icon={<CalendarOutlined />}
+                            onClick={() => irACargarAsistencia(curso.idCurso)}
+                            style={{ borderRadius: 8 }}
+                          >
+                            Cargar Asistencia
+                          </Button>
+                        </div>
+                      </Card>
+                    </Col>
+                  );
+                })}
+
+                {cursosFiltrados.length === 0 && (
+                  <Col xs={24}>
+                    <div className="cursos-empty">
+                      <Text type="secondary">
+                        No se encontraron cursos que coincidan con la búsqueda.
+                      </Text>
+                    </div>
+                  </Col>
+                )}
+              </Row>
+            )}
 
             <Text className="cursos-pie-pagina">
               AulaActiva · Sistema de gestión académica
