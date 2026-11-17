@@ -12,6 +12,7 @@ import PerfilDocente from '../pages/Profesor/PerfilDocente'
 import PanelAlumno from '../pages/Alumno/PanelAlumno'
 import MisAsistencias from '../pages/Alumno/MisAsistencias'
 import MisCursosAlumno from '../pages/Alumno/MisCursos'
+import AgendaPersonal from '../pages/Alumno/AgendaPersonal'
 import ProtectedRoute from './ProtectedRoute'
 import { ROUTES } from '../constants/routes'
 
@@ -21,7 +22,10 @@ function AppRouter() {
       <Route path={ROUTES.INICIO} element={<Inicio />} />
       <Route path={ROUTES.LOGIN} element={<Login />} />
       <Route path={ROUTES.REGISTRO} element={<Registro />} />
-      <Route path={ROUTES.RECUPERAR_CONTRASENA} element={<RecuperarContrasena />} />
+      <Route
+        path={ROUTES.RECUPERAR_CONTRASENA}
+        element={<RecuperarContrasena />}
+      />
 
       {/* Rutas de Profesor */}
       <Route
@@ -95,6 +99,14 @@ function AppRouter() {
         element={
           <ProtectedRoute rolRequerido="ALUMNO">
             <MisCursosAlumno />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ROUTES.ALUMNO_AGENDA_PERSONAL}
+        element={
+          <ProtectedRoute rolRequerido="ALUMNO">
+            <AgendaPersonal />
           </ProtectedRoute>
         }
       />

@@ -1,7 +1,11 @@
+/* =========================================
+   BASE GENERAL - ESTILO SAHARA
+========================================= */
 
 .layout {
   min-height: 100vh;
   background: #f7f5f0;
+  color: #514236;
 }
 
 .header {
@@ -43,7 +47,7 @@
 }
 
 .brandText {
-  color: #26211a !important;
+  color: #795b3f !important;
   font-size: 18px;
   font-weight: 700;
 }
@@ -55,7 +59,38 @@
 }
 
 .nombreHeader {
-  color: #26211a;
+  color: #795b3f;
+  font-weight: 600;
+}
+
+/* Botón para cerrar sesión */
+
+.botonSalir {
+  min-height: 36px;
+  padding: 0 16px;
+  border: 1px solid #ba9680;
+  border-radius: 9px;
+  background: #fff;
+  color: #795b4a;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.botonSalir:hover {
+  border-color: #98745f;
+  background: #98745f;
+  color: #fff;
+}
+
+.botonSalir:focus-visible {
+  outline: 3px solid #795b4a;
+  outline-offset: 3px;
 }
 
 .content {
@@ -67,6 +102,10 @@
   max-width: 1160px;
   margin: 0 auto;
 }
+
+/* =========================================
+   BIENVENIDA
+========================================= */
 
 .bienvenida {
   position: relative;
@@ -84,29 +123,34 @@
   border: none;
   border-radius: 999px;
   background: #f1e4cd;
-  color: #8a6530;
-  font-weight: 600;
+  color: #94704d;
+  font-weight: 700;
+  letter-spacing: 0.06em;
 }
 
 .titulo {
   margin: 0 0 12px !important;
-  color: #26211a !important;
+  color: #795b3f !important;
   font-size: clamp(30px, 4vw, 42px) !important;
+  font-weight: 700;
 }
 
 .subtitulo {
   max-width: 600px;
   margin-bottom: 24px;
-  color: #6f675c;
+  color: #786b5b;
   font-size: 16px;
+  line-height: 1.7;
 }
 
-/* AGENDA SEMANAL */
+/* =========================================
+   AGENDA SEMANAL
+========================================= */
 
 .agenda {
   margin-top: 28px;
   padding: 26px;
-  border: 1px solid #e8e5d9;
+  border: 1px solid #e8e0d4;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 5px 20px rgba(55, 43, 24, 0.045);
@@ -126,9 +170,16 @@
   gap: 13px;
 }
 
-.agendaTitulo h3 {
+.agendaTitulo h2 {
   margin: 0 0 3px;
-  color: #26211a;
+  color: #795b4a;
+  font-size: 21px;
+}
+
+.agendaTitulo p {
+  margin: 0;
+  color: #817365;
+  font-size: 14px;
 }
 
 .agendaIcono {
@@ -138,8 +189,8 @@
   width: 46px;
   height: 46px;
   border-radius: 13px;
-  background: #e7f0df;
-  color: #477f68;
+  background: #ebd9cc;
+  color: #98745f;
   font-size: 21px;
 }
 
@@ -155,30 +206,36 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  border-color: #dce5d8;
+  border: 1px solid #ba9680;
   border-radius: 9px;
-  color: #477f68;
+  background: #fff;
+  color: #98745f;
+  cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .botonSemana:hover {
-  border-color: #477f68 !important;
-  background: #e7f0df !important;
-  color: #315e4b !important;
+  border-color: #98745f;
+  background: #ebd9cc;
+  color: #795b4a;
 }
 
 .botonHoy {
   height: 36px;
-  border-color: #477f68;
+  padding: 0 14px;
+  border: 1px solid #98745f;
   border-radius: 9px;
-  color: #477f68;
+  background: #fff;
+  color: #98745f;
   font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .botonHoy:hover {
-  border-color: #315e4b !important;
-  background: #e7f0df !important;
-  color: #315e4b !important;
+  border-color: #795b4a;
+  background: #ebd9cc;
+  color: #795b4a;
 }
 
 .agendaPeriodo {
@@ -223,36 +280,42 @@
 
 .diaCard:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 17px rgba(45, 65, 45, 0.12);
+  box-shadow: 0 8px 17px rgba(55, 43, 24, 0.10);
 }
 
+/* Día con cursada */
+
 .diaConClases {
-  border-color: #c9dfb5;
-  background: #a7d96b;
+  border-color: #a47c4e;
+  background: #dcc3a5;
 }
 
 .diaConClases:hover {
-  background: #b5e17f;
+  background: #d2b58f;
 }
 
+/* Día libre */
+
 .diaLibre {
-  border-color: #ead0b7;
-  background: #dda16d;
+  border-color: #e8e0d4;
+  background: #f8f5ef;
 }
 
 .diaLibre:hover {
-  background: #e7b17f;
+  background: #f0ece4;
 }
 
+/* Día actual */
+
 .diaHoy {
-  border: 2px solid #477f68;
-  background: #477f68;
-  color: #fff;
-  box-shadow: 0 4px 13px rgba(48, 91, 70, 0.18);
+  border: 2px solid #98745f;
+  background: #ebd9cc;
+  color: #4d3b31;
+  box-shadow: 0 4px 13px rgba(152, 116, 95, 0.16);
 }
 
 .diaHoy:hover {
-  background: #568e76;
+  background: #e5cdbd;
 }
 
 .diaEncabezado {
@@ -264,32 +327,40 @@
 }
 
 .diaNombre {
-  color: #30452b;
+  color: #514236;
   font-size: 13px;
   font-weight: 700;
 }
 
-.diaHoy .diaNombre,
-.diaHoy .diaFecha,
-.diaHoy .diaSinClases,
-.diaHoy .diaSinClases .ant-typography {
-  color: #fff !important;
+.diaFecha {
+  margin-top: 5px;
+  color: #6f675c;
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.diaConClases .diaNombre,
+.diaConClases .diaFecha {
+  color: #62472f;
+}
+
+.diaLibre .diaNombre,
+.diaLibre .diaFecha {
+  color: #7b7063;
 }
 
 .etiquetaHoy {
   padding: 3px 6px;
   border-radius: 20px;
-  background: #fff;
-  color: #477f68;
+  background: #98745f;
+  color: #fff;
   font-size: 9px;
   font-weight: 800;
 }
 
-.diaFecha {
-  margin-top: 5px;
-  color: #53634b;
-  font-size: 12px;
-  text-transform: capitalize;
+.diaHoy .diaNombre,
+.diaHoy .diaFecha {
+  color: #4d3b31;
 }
 
 .listaClases {
@@ -304,13 +375,13 @@
   flex-direction: column;
   gap: 5px;
   padding: 9px 7px;
-  border: 1px solid rgba(65, 93, 51, 0.12);
+  border: 1px solid rgba(148, 112, 77, 0.18);
   border-radius: 9px;
-  background: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.82);
 }
 
 .claseMateria {
-  color: #30452b;
+  color: #514236;
   font-size: 12px;
   font-weight: 700;
   line-height: 1.35;
@@ -321,19 +392,19 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  color: #53634b;
+  color: #6f675c;
   font-size: 10px;
   line-height: 1.4;
 }
 
 .diaHoy .claseItem {
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: #ba9680;
 }
 
 .diaHoy .claseMateria,
 .diaHoy .claseHorario,
 .diaHoy .claseComision {
-  color: #304d3e;
+  color: #514236;
 }
 
 .diaSinClases {
@@ -344,7 +415,7 @@
   justify-content: center;
   gap: 9px;
   margin-top: 10px;
-  color: #75502f;
+  color: #98745f;
   font-size: 12px;
   text-align: center;
 }
@@ -352,6 +423,18 @@
 .diaSinClases .anticon {
   font-size: 21px;
   opacity: 0.8;
+}
+
+/* Eventos personales */
+
+.etiquetaEventoPersonal {
+  padding: 3px 6px;
+  border: 1px solid #e5c5a8;
+  border-radius: 6px;
+  background: #f3e3d3;
+  color: #8a4f2b;
+  font-size: 10px;
+  font-weight: 600;
 }
 
 .agendaPie {
@@ -376,7 +459,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #6f675c;
+  color: #786b5b;
   font-size: 11px;
 }
 
@@ -388,24 +471,26 @@
 }
 
 .referenciaVerde {
-  background: #a7d96b;
+  background: #a47c4e;
 }
 
 .referenciaNaranja {
-  background: #dda16d;
+  background: #e8e0d4;
 }
 
 .referenciaHoy {
-  background: #477f68;
+  background: #98745f;
 }
 
 .enlaceCursos {
-  color: #477f68 !important;
-  font-weight: 600;
+  color: #94704d !important;
+  font-weight: 700;
+  text-decoration: none;
 }
 
 .enlaceCursos:hover {
-  color: #315e4b !important;
+  color: #795b4a !important;
+  text-decoration: underline;
 }
 
 .notaAgenda {
@@ -415,7 +500,9 @@
   font-size: 11px;
 }
 
-/* RESUMEN DE ASISTENCIA */
+/* =========================================
+   RESUMEN DE ASISTENCIA
+========================================= */
 
 .seccion {
   margin-bottom: 36px;
@@ -425,17 +512,30 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   margin-bottom: 20px;
 }
 
 .seccionTitulo h2 {
   margin: 0 0 5px;
-  color: #26211a;
+  color: #795b4a;
+  font-size: 23px;
+  font-weight: 700;
+}
+
+.descripcionSeccion {
+  margin: -8px 0 18px;
+  color: #786b5b;
+  line-height: 1.6;
 }
 
 .resumenCard {
-  height: 100%;
-  border: 1px solid #eee8de;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid #eee0d4;
   border-radius: 16px;
   background: #fff;
   box-shadow: 0 4px 16px rgba(55, 43, 24, 0.035);
@@ -451,6 +551,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  color: #795b4a;
+  font-weight: 700;
 }
 
 .iconoResumen {
@@ -460,44 +562,91 @@
   width: 38px;
   height: 38px;
   border-radius: 11px;
+  background: #ebd9cc;
+  color: #98745f;
   font-size: 17px;
 }
 
-.presente {
-  background: #e4efe4;
-  color: #367044;
+/* Los colores se aplican también a los números */
+
+.presente,
+.tarde,
+.ausente,
+.justificada,
+.suspendida,
+.porcentaje {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
 }
 
-.ausente {
-  background: #f8e5e1;
-  color: #a74436;
+.presente {
+  color: #78a832;
 }
 
 .tarde {
-  background: #fff0d8;
-  color: #98691e;
+  color: #bd8124;
+}
+
+.ausente {
+  color: #bd5146;
 }
 
 .justificada {
-  background: #e7e9f8;
-  color: #515b9c;
+  color: #596ba5;
+}
+
+.suspendida {
+  color: #77736d;
+}
+
+.porcentaje {
+  color: #795b4a;
 }
 
 .cantidad {
-  margin: 20px 0 0 !important;
-  color: #26211a !important;
+  margin: 0 !important;
+  color: inherit;
   font-size: 32px !important;
+  font-weight: 800;
+  line-height: 1.2;
 }
 
-/* ACCESOS PRINCIPALES */
+/* Semáforo del porcentaje de asistencia */
+
+.porcentajeVerde {
+  color: #36804a !important;
+}
+
+.porcentajeAmarillo {
+  color: #bd8124 !important;
+}
+
+.porcentajeRojo {
+  color: #bd5146 !important;
+}
+
+/* =========================================
+   ACCESOS PRINCIPALES
+========================================= */
 
 .acceso {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
   margin-bottom: 12px;
 }
 
 .accesoCard {
-  height: 100%;
-  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 230px;
+  padding: 18px;
   overflow: hidden;
   border: 1px solid #e9e0d2;
   border-radius: 18px;
@@ -510,44 +659,70 @@
   box-shadow: 0 13px 28px rgba(55, 43, 24, 0.13);
 }
 
+/* Mis Cursos */
+
 .accesoCursos {
-  border-color: #ead9b9;
-  background: linear-gradient(135deg, #fff 0%, #f7f0e4 100%);
+  border-color: #b89570;
+  background: linear-gradient(135deg, #fff 0%, #e8d7c1 100%);
 }
 
 .accesoCursos .accesoIcono {
-  background: #f1e4cd;
-  color: #8a6530;
+  background: #e8d7c1;
+  color: #94704d;
 }
 
 .accesoCursos .botonAcceso {
-  border-color: #bc9150;
-  background: #bc9150;
+  border-color: #94704d;
+  background: #94704d;
 }
 
 .accesoCursos .botonAcceso:hover {
-  border-color: #9b743b !important;
-  background: #9b743b !important;
+  border-color: #b89570;
+  background: #b89570;
 }
 
+/* Mis Asistencias */
+
 .accesoAsistencias {
-  border-color: #d5e5d3;
-  background: linear-gradient(135deg, #fff 0%, #edf4ec 100%);
+  border-color: #c3a078;
+  background: linear-gradient(135deg, #fff 0%, #ede0cc 100%);
 }
 
 .accesoAsistencias .accesoIcono {
-  background: #e4efe4;
-  color: #367044;
+  background: #ede0cc;
+  color: #a47c4e;
 }
 
 .accesoAsistencias .botonAcceso {
-  border-color: #668c69;
-  background: #668c69;
+  border-color: #a47c4e;
+  background: #a47c4e;
 }
 
 .accesoAsistencias .botonAcceso:hover {
-  border-color: #4d7050 !important;
-  background: #4d7050 !important;
+  border-color: #c3a078;
+  background: #c3a078;
+}
+
+/* Mi Agenda Personal */
+
+.accesoAgenda {
+  border-color: #ba9680;
+  background: linear-gradient(135deg, #fff 0%, #ebd9cc 100%);
+}
+
+.accesoAgenda .accesoIcono {
+  background: #ebd9cc;
+  color: #98745f;
+}
+
+.accesoAgenda .botonAcceso {
+  border-color: #98745f;
+  background: #98745f;
+}
+
+.accesoAgenda .botonAcceso:hover {
+  border-color: #ba9680;
+  background: #ba9680;
 }
 
 .accesoContenido {
@@ -555,7 +730,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 16px;
-  height: 100%;
+  flex: 1;
   padding: 8px;
 }
 
@@ -565,6 +740,7 @@
   justify-content: center;
   width: 52px;
   height: 52px;
+  flex-shrink: 0;
   border-radius: 14px;
   font-size: 23px;
 }
@@ -574,26 +750,58 @@
   width: 100%;
 }
 
-.accesoTexto h4 {
+.accesoTexto h3 {
   margin: 0 0 8px;
-  color: #26211a;
+  color: #795b4a;
+  font-size: 19px;
+  font-weight: 700;
 }
 
 .accesoTexto p {
-  margin-bottom: 0;
-  color: #6f675c;
+  margin: 0;
+  color: #786b5b;
   line-height: 1.6;
+  font-size: 14px;
 }
+
+/* Enlaces con apariencia de botones */
 
 .botonAcceso {
-  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  min-height: 42px;
+  margin: 12px 8px 4px;
   padding: 0 20px;
+  border: 1px solid;
   border-radius: 9px;
   box-shadow: none;
-  font-weight: 600;
+  color: #fff !important;
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none !important;
+  box-sizing: border-box;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
-/* PIE DE PÁGINA */
+.botonAcceso:hover {
+  color: #fff !important;
+  transform: translateY(-1px);
+}
+
+.botonAcceso:focus-visible {
+  outline: 3px solid #795b4a;
+  outline-offset: 3px;
+}
+
+/* =========================================
+   PIE DE PÁGINA
+========================================= */
 
 .footer {
   padding: 24px;
@@ -603,7 +811,13 @@
   text-align: center;
 }
 
-/* ADAPTACIÓN PARA CELULARES */
+.footer p {
+  margin: 0;
+}
+
+/* =========================================
+   ADAPTACIÓN PARA TABLETS
+========================================= */
 
 @media (max-width: 900px) {
   .agendaGrid {
@@ -613,7 +827,15 @@
   .diaCard {
     min-height: 185px;
   }
+
+  .acceso {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
+
+/* =========================================
+   ADAPTACIÓN PARA CELULARES
+========================================= */
 
 @media (max-width: 640px) {
   .header {
@@ -626,6 +848,11 @@
 
   .nombreHeader {
     display: none;
+  }
+
+  .botonSalir {
+    min-height: 34px;
+    padding: 0 13px;
   }
 
   .content {
@@ -667,20 +894,30 @@
     gap: 10px;
   }
 
-  .accesoCard {
-    min-height: auto;
+  .resumenCard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 12px;
+    padding: 16px;
   }
 
-  .accesoContenido {
-    padding: 4px;
+  .acceso {
+    grid-template-columns: 1fr;
+  }
+
+  .accesoCard {
+    min-height: 210px;
   }
 
   .botonAcceso {
-    width: 100%;
+    align-self: stretch;
+    width: auto;
+    margin: 12px 8px 4px;
   }
 }
 
-/* RESPETA LA PREFERENCIA DE MOVIMIENTO REDUCIDO */
+/* =========================================
+   RESPETA LA PREFERENCIA DE MOVIMIENTO REDUCIDO
+========================================= */
 
 @media (prefers-reduced-motion: reduce) {
   .agendaGrid {
@@ -690,13 +927,17 @@
   .diaCard,
   .resumenCard,
   .accesoCard,
-  .botonSemana {
+  .botonSemana,
+  .botonHoy,
+  .botonSalir,
+  .botonAcceso {
     transition: none;
   }
 
   .diaCard:hover,
   .resumenCard:hover,
-  .accesoCard:hover {
+  .accesoCard:hover,
+  .botonAcceso:hover {
     transform: none;
   }
 }

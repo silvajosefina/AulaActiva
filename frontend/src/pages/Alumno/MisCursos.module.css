@@ -2,8 +2,8 @@
 .contenedor {
   min-height: 100vh;
   padding: 40px 6%;
-  background: #f5f7fb;
-  color: #263449;
+  background: #f8f4ed;
+  color: #4c4035;
   font-family: inherit;
 }
 
@@ -17,7 +17,7 @@
 
 .etiqueta {
   margin: 0 0 8px;
-  color: #4d8b82;
+  color: #94704d;
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 2px;
@@ -25,14 +25,14 @@
 
 .encabezado h1 {
   margin: 0;
-  color: #263449;
+  color: #6f5138;
   font-size: clamp(2rem, 4vw, 2.6rem);
   font-weight: 750;
 }
 
 .subtitulo {
   margin: 10px 0 0;
-  color: #718096;
+  color: #897b6c;
   font-size: 1rem;
 }
 
@@ -41,10 +41,10 @@
   align-items: center;
   justify-content: center;
   padding: 12px 20px;
-  border: 1px solid #dce6e7;
+  border: 1px solid #e2d2bf;
   border-radius: 12px;
-  background: #ffffff;
-  color: #397c73;
+  background: #fffdf9;
+  color: #94704d;
   font-size: 0.9rem;
   font-weight: 700;
   text-decoration: none;
@@ -52,7 +52,7 @@
 }
 
 .botonVolver:hover {
-  background: #eaf4f1;
+  background: #f2e8dc;
   transform: translateY(-2px);
 }
 
@@ -66,13 +66,13 @@
 
 .seccionFiltro h2 {
   margin: 0;
-  color: #263449;
+  color: #5f4936;
   font-size: 1.35rem;
 }
 
 .seccionFiltro p {
   margin: 6px 0 0;
-  color: #8290a2;
+  color: #897b6c;
   font-size: 0.9rem;
 }
 
@@ -80,7 +80,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  color: #526176;
+  color: #6d5d4d;
   font-size: 0.9rem;
   font-weight: 650;
 }
@@ -88,28 +88,28 @@
 .filtro select {
   min-width: 170px;
   padding: 11px 14px;
-  border: 1px solid #dce5eb;
+  border: 1px solid #e5d8c8;
   border-radius: 10px;
   outline: none;
-  background: #ffffff;
-  color: #33445b;
+  background: #fffdf9;
+  color: #5f4936;
   font: inherit;
   cursor: pointer;
 }
 
 .filtro select:focus {
-  border-color: #6ba99d;
-  box-shadow: 0 0 0 3px rgb(107 169 157 / 15%);
+  border-color: #b89570;
+  box-shadow: 0 0 0 3px rgb(148 112 77 / 14%);
 }
 
 .textoPeriodo {
   margin: 20px 0;
-  color: #8290a2;
+  color: #897b6c;
   font-size: 0.88rem;
 }
 
 .textoPeriodo strong {
-  color: #397c73;
+  color: #94704d;
 }
 
 .listaMaterias {
@@ -119,15 +119,15 @@
 
 .tarjetaMateria {
   overflow: hidden;
-  border: 1px solid #e5ebf0;
+  border: 1px solid #e8dccb;
   border-radius: 18px;
-  background: #ffffff;
-  box-shadow: 0 5px 18px rgb(37 55 77 / 5%);
+  background: #fffdf9;
+  box-shadow: 0 5px 18px rgb(111 81 56 / 7%);
   transition: box-shadow 0.25s ease, transform 0.25s ease;
 }
 
 .tarjetaMateria:hover {
-  box-shadow: 0 9px 24px rgb(37 55 77 / 9%);
+  box-shadow: 0 9px 24px rgb(111 81 56 / 12%);
 }
 
 .cabeceraTarjeta {
@@ -145,7 +145,7 @@
 }
 
 .cabeceraTarjeta:hover {
-  background: #fbfdfd;
+  background: #fcf8f2;
 }
 
 .infoMateria {
@@ -161,25 +161,25 @@
   flex-shrink: 0;
   place-items: center;
   border-radius: 14px;
-  background: #eaf4f1;
-  color: #46887d;
+  background: #e8d7c1;
+  color: #94704d;
   font-size: 1.4rem;
 }
 
 .infoMateria h3 {
   margin: 0;
-  color: #29394f;
+  color: #4f4033;
   font-size: 1.08rem;
 }
 
 .infoMateria p {
   margin: 5px 0 0;
-  color: #8290a2;
+  color: #897b6c;
   font-size: 0.85rem;
 }
 
 .infoMateria .nombreDocente {
-  color: #62758a;
+  color: #806c59;
 }
 
 .resumenMateria {
@@ -189,26 +189,38 @@
 }
 
 .porcentaje {
-  color: #397c73;
+  color: #6d5a48;
   font-size: 1.35rem;
   font-weight: 800;
 }
 
+.porcentajeRojo {
+  color: #c84f4b;
+}
+
+.porcentajeAmarillo {
+  color: #b98222;
+}
+
+.porcentajeVerde {
+  color: #56823f;
+}
+
 .textoAsistencia {
-  color: #8290a2;
+  color: #897b6c;
   font-size: 0.82rem;
 }
 
 .flecha {
   margin-left: 12px;
-  color: #66877f;
+  color: #94704d;
   font-size: 1.5rem;
 }
 
 .detalleMateria {
   padding: 24px;
-  border-top: 1px solid #edf1f4;
-  background: #fcfdfd;
+  border-top: 1px solid #e9ddcd;
+  background: #fbf7f0;
   animation: aparecer 0.25s ease;
 }
 
@@ -226,7 +238,7 @@
 
 .detalleMateria h4 {
   margin: 0 0 16px;
-  color: #35465b;
+  color: #654d37;
   font-size: 1rem;
 }
 
@@ -252,15 +264,15 @@
   justify-content: space-between;
   gap: 16px;
   padding: 13px 16px;
-  border: 1px solid #e4eeeb;
+  border: 1px solid #e7d6c1;
   border-radius: 11px;
-  background: #f3f8f6;
-  color: #526176;
+  background: #f4ece1;
+  color: #6d5d4d;
   font-size: 0.88rem;
 }
 
 .horario strong {
-  color: #397c73;
+  color: #94704d;
   white-space: nowrap;
 }
 
@@ -277,25 +289,25 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  border: 1px solid #e8edf1;
+  border: 1px solid #e9ddce;
   border-radius: 13px;
-  background: #ffffff;
+  background: #fffefc;
 }
 
 .estadistica strong {
-  color: #397c73;
+  color: #94704d;
   font-size: 1.55rem;
 }
 
 .estadistica span {
-  color: #8290a2;
+  color: #897b6c;
   font-size: 0.8rem;
   text-align: center;
 }
 
 .aclaracion {
   margin: 13px 0 0;
-  color: #8290a2;
+  color: #897b6c;
   font-size: 0.82rem;
   line-height: 1.5;
 }
@@ -311,10 +323,10 @@
   justify-content: space-between;
   gap: 16px;
   padding: 11px 14px;
-  border: 1px solid #edf1f4;
+  border: 1px solid #efe6da;
   border-radius: 10px;
-  background: #ffffff;
-  color: #526176;
+  background: #fffdf9;
+  color: #6d5d4d;
   font-size: 0.88rem;
 }
 
@@ -353,14 +365,14 @@
 .sinClases {
   padding: 14px;
   border-radius: 10px;
-  background: #f3f6f8;
-  color: #8290a2;
+  background: #f4ece1;
+  color: #897b6c;
   font-size: 0.88rem;
 }
 
 .notaDemo {
   margin: 26px 0 0;
-  color: #929eac;
+  color: #9a8c7d;
   font-size: 0.8rem;
   line-height: 1.5;
   text-align: center;

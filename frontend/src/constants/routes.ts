@@ -1,4 +1,3 @@
-
 export const ROUTES = {
   INICIO: '/',
   LOGIN: '/login',
@@ -13,5 +12,5 @@ export const ROUTES = {
   ALUMNO: '/alumno',
   ALUMNO_ASISTENCIAS: '/alumno/asistencias',
   ALUMNO_CURSOS: '/alumno/cursos',
+  ALUMNO_AGENDA_PERSONAL: '/alumno/agenda-personal',
 } as const
-
