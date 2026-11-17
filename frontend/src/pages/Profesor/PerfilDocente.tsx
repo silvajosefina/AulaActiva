@@ -24,10 +24,15 @@ export default function PerfilDocente() {
 
       message.success('Contraseña actualizada con éxito');
       form.resetFields();
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.error || error.response?.data?.mensaje || 'Error al actualizar la contraseña';
-      message.error(errorMsg);
-    } finally {
+      } catch (error: any) {
+            const errorMsg =
+              error.response?.data?.message ||
+              error.response?.data?.error ||
+              error.response?.data?.mensaje ||
+              error.message ||
+              'Error al actualizar la contraseña';
+            message.error(errorMsg);
+          }finally {
       setLoading(false);
     }
   };

@@ -62,6 +62,10 @@ export async function actualizarPasswordController(req: Request, res: Response) 
       return res.status(400).json({ message: 'La contraseña actual y la nueva son obligatorias' })
     }
 
+    if (nueva.length < 6) {
+      return res.status(400).json({ message: 'La nueva contraseña debe tener al menos 6 caracteres' })
+    }
+
     await actualizarPasswordDocente(req.usuario!.idUsuario, actual, nueva)
     res.status(200).json({ message: 'Contraseña actualizada con éxito' })
   } catch (err: any) {
