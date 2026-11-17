@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Layout,
@@ -16,6 +16,8 @@ import {
   Input,
   message,
   Drawer,
+  Spin,
+  Alert,
 } from "antd";
 import {
   HomeOutlined,
@@ -29,62 +31,34 @@ import {
   MenuOutlined,
   SearchOutlined,
   ClockCircleOutlined,
-  FileTextOutlined,
 } from "@ant-design/icons";
+import axios from "axios";
 import "dayjs/locale/es";
 import locale from "antd/locale/es_ES";
 import { clearSession, getSessionUser } from "../../services/auth";
 import { ROUTES } from "../../constants/routes";
+import { getMateriasDocente, type MateriaDocente } from "../../services/docenteService";
 import "./Materias.css";
 
 const { Sider, Header, Content } = Layout;
 const { Title, Text } = Typography;
 
-interface Materia {
-  id: string;
-  codigo: string;
-  nombre: string;
-  nivel: string;
-  comisiones: string[];
-  horasSemanales: number;
-  estado: "En cursado" | "Finalizada" | "Planificada";
+function describirNiveles(materia: MateriaDocente): string {
+  return [...new Set(materia.cursos.map((curso) => curso.anio))]
+    .sort((a, b) => a - b)
+    .map((anio) => `${anio}º año`)
+    .join(" / ");
 }
-
-const materiasMock: Materia[] = [
-  {
-    id: "1",
-    codigo: "K102",
-    nombre: "Bases de Datos",
-    nivel: "3er Año",
-    comisiones: ["Comisión 1K1", "Comisión 1K2"],
-    horasSemanales: 6,
-    estado: "En cursado",
-  },
-  {
-    id: "2",
-    codigo: "K204",
-    nombre: "Programación Web",
-    nivel: "3er Año",
-    comisiones: ["Comisión 2K1"],
-    horasSemanales: 8,
-    estado: "En cursado",
-  },
-  {
-    id: "3",
-    codigo: "K105",
-    nombre: "Matemática Discreta",
-    nivel: "1er Año",
-    comisiones: ["Comisión 101"],
-    horasSemanales: 5,
-    estado: "Finalizada",
-  },
-];
 
 export default function Materias() {
   const navigate = useNavigate();
   const usuario = getSessionUser();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [busqueda, setBusqueda] = useState("");
+  const [materias, setMaterias] = useState<MateriaDocente[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [intento, setIntento] = useState(0);
   const [messageApi, contextHolder] = message.useMessage();
 
   const nombreCompleto = usuario
@@ -99,10 +73,44 @@ export default function Materias() {
     navigate(ROUTES.LOGIN);
   };
 
-  const materiasFiltradas = materiasMock.filter(
-    (m) =>
-      m.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      m.codigo.toLowerCase().includes(busqueda.toLowerCase())
+  useEffect(() => {
+    let activo = true;
+    getMateriasDocente()
+      .then((datos) => {
+        if (activo) setMaterias(datos);
+      })
+      .catch((err) => {
+        if (!activo) return;
+        if (axios.isAxiosError(err) && err.response?.status === 401) {
+          clearSession();
+          navigate(ROUTES.LOGIN);
+          return;
+        }
+        setError(
+          axios.isAxiosError(err) && !err.response
+            ? "No pudimos conectarnos con el servidor. Revisá que el backend esté levantado."
+            : "No pudimos cargar tus materias. Intentá de nuevo."
+        );
+      })
+      .finally(() => {
+        if (activo) setCargando(false);
+      });
+    return () => {
+      activo = false;
+    };
+  }, [intento, navigate]);
+
+  const reintentar = () => {
+    setCargando(true);
+    setError(null);
+    setIntento((n) => n + 1);
+  };
+
+  const textoBuscado = busqueda.trim().toLowerCase();
+  const materiasFiltradas = materias.filter(
+    (materia) =>
+      materia.nombre.toLowerCase().includes(textoBuscado) ||
+      materia.cursos.some((curso) => curso.comision.toLowerCase().includes(textoBuscado))
   );
 
   const opcionesMenu = [
@@ -270,12 +278,12 @@ const menuUsuario = {
                   Materias a Cargo
                 </Title>
                 <Text type="secondary" style={{ fontSize: 14 }}>
-                  Plan de estudio, comisiones y programas asignados
+                  Materias y comisiones asignadas
                 </Text>
               </div>
 
               <Input
-                placeholder="Buscar materia o código..."
+                placeholder="Buscar materia o comisión..."
                 prefix={<SearchOutlined style={{ color: "#9a9284" }} />}
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
@@ -284,71 +292,79 @@ const menuUsuario = {
               />
             </div>
 
-            <Row gutter={[20, 20]}>
-              {materiasFiltradas.map((materia) => (
-                <Col xs={24} md={12} lg={8} key={materia.id}>
-                  <Card
-                    variant="borderless"
-                    className="materia-card"
-                    actions={[
-                      <Button
-                        type="link"
-                        icon={<FileTextOutlined />}
-                        style={{ color: "#8a6530" }}
-                        onClick={() =>
-                          messageApi.info(`Programa de ${materia.nombre} descargado.`)
-                        }
-                      >
-                        Ver Programa
-                      </Button>,
-                    ]}
-                  >
-                    <div className="materia-card-top">
-                      <Tag color="gold" style={{ borderRadius: 6 }}>
-                        {materia.codigo}
-                      </Tag>
-                      <Tag
-                        color={
-                          materia.estado === "En cursado" ? "green" : "default"
-                        }
-                        style={{ borderRadius: 6 }}
-                      >
-                        {materia.estado}
-                      </Tag>
-                    </div>
+            {cargando && (
+              <div style={{ display: "flex", justifyContent: "center", padding: 48 }}>
+                <Spin />
+              </div>
+            )}
 
-                    <Title level={4} style={{ margin: "12px 0 4px" }}>
-                      {materia.nombre}
-                    </Title>
-                    <Text type="secondary" style={{ fontSize: 13 }}>
-                      {materia.nivel}
+            {!cargando && error && (
+              <Alert
+                type="error"
+                showIcon
+                title={error}
+                action={
+                  <Button size="small" onClick={reintentar}>
+                    Reintentar
+                  </Button>
+                }
+              />
+            )}
+
+            {!cargando && !error && (
+              <Row gutter={[20, 20]}>
+                {materiasFiltradas.map((materia) => (
+                  <Col xs={24} md={12} lg={8} key={materia.idMateria}>
+                    <Card variant="borderless" className="materia-card">
+                      <div className="materia-card-top">
+                        <Tag color="gold" style={{ borderRadius: 6 }}>
+                          {describirNiveles(materia)}
+                        </Tag>
+                      </div>
+
+                      <Title level={4} style={{ margin: "12px 0 4px" }}>
+                        {materia.nombre}
+                      </Title>
+                      <Text type="secondary" style={{ fontSize: 13 }}>
+                        {materia.carrera}
+                      </Text>
+
+                      <div className="materia-detalles">
+                        <div className="materia-detalle-item">
+                          <ClockCircleOutlined style={{ color: "#8d8676" }} />
+                          <Text style={{ fontSize: 13 }}>
+                            {materia.horasSemanales} horas semanales
+                          </Text>
+                        </div>
+
+                        <div className="materia-comisiones-lista">
+                          <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
+                            Comisiones asignadas:
+                          </Text>
+                          <Space wrap size={[4, 4]}>
+                            {materia.cursos.map((curso) => (
+                              <Tag key={curso.idCurso} variant="outlined" color="default">
+                                Comisión {curso.comision}
+                              </Tag>
+                            ))}
+                          </Space>
+                        </div>
+                      </div>
+                    </Card>
+                  </Col>
+                ))}
+
+                {materiasFiltradas.length === 0 && (
+                  <Col xs={24}>
+                    <Text type="secondary">
+                      {materias.length === 0
+                        ? "Todavía no tenés materias asignadas."
+                        : "No se encontraron materias que coincidan con la búsqueda."}
                     </Text>
-
-                    <div className="materia-detalles">
-                      <div className="materia-detalle-item">
-                        <ClockCircleOutlined style={{ color: "#8d8676" }} />
-                        <Text style={{ fontSize: 13 }}>
-                          {materia.horasSemanales} horas semanales
-                        </Text>
-                      </div>
-
-                      <div className="materia-comisiones-lista">
-                        <Text type="secondary" style={{ fontSize: 12, display: "block", marginBottom: 4 }}>
-                          Comisiones asignadas:
-                        </Text>
-                        <Space wrap size={[4, 4]}>
-                          {materia.comisiones.map((com, idx) => (
-                            <Tag key={idx} variant="outlined" color="default">
-                              {com}
-                            </Tag>
-                          ))}
-                        </Space>
-                      </div>
-                    </div>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
+                  </Col>
+                )}
+              </Row>
+            )}
 
             <Text className="materias-pie-pagina">
               AulaActiva · Sistema de gestión académica
