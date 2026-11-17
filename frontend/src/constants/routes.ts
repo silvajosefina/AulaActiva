@@ -3,6 +3,7 @@ export const ROUTES = {
   LOGIN: '/login',
   REGISTRO: '/registro',
   RECUPERAR_CONTRASENA: '/recuperar-contrasena',
+  RESTABLECER_CONTRASENA: '/restablecer-contrasena',
   PROFESOR_INICIO: '/profesor/inicio',
   PROFESOR_ASISTENCIA: '/profesor/asistencia',
   PROFESOR_CURSOS: '/profesor/cursos',

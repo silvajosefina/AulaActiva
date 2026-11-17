@@ -3,6 +3,7 @@ import Inicio from '../pages/Inicio/Inicio'
 import Login from '../pages/Login/Login'
 import Registro from '../pages/Registro/Registro'
 import RecuperarContrasena from '../pages/RecuperarContrasena/RecuperarContrasena'
+import RestablecerContrasena from '../pages/RestablecerContrasena/RestablecerContrasena'
 import CargaAsistencia from '../pages/Profesor/CargaAsistencia'
 import InicioProfesor from '../pages/Profesor/InicioProfesor'
 import MisCursos from '../pages/Profesor/MisCursos'
@@ -26,6 +27,10 @@ function AppRouter() {
       <Route
         path={ROUTES.RECUPERAR_CONTRASENA}
         element={<RecuperarContrasena />}
+      />
+      <Route
+        path={ROUTES.RESTABLECER_CONTRASENA}
+        element={<RestablecerContrasena />}
       />
 
       {/* Rutas de Profesor */}

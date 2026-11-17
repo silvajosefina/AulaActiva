@@ -4,8 +4,12 @@ import {
   InvalidCredentialsError,
   login,
   register,
+  restablecerContrasena,
   RolIncorrectoError,
+  solicitarRecuperacion,
+  TokenRecuperacionInvalidoError,
 } from '../services/auth.service'
+import { MailNoConfiguradoError } from '../services/mail.service'
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -79,6 +83,55 @@ export async function registerController(req: Request, res: Response) {
   } catch (err) {
     if (err instanceof DuplicateUserError) {
       res.status(409).json({ message: err.message })
+      return
+    }
+    console.error(err)
+    res.status(500).json({ message: 'Error interno del servidor' })
+  }
+}
+
+export async function recuperarContrasenaController(req: Request, res: Response) {
+  const { email } = (req.body ?? {}) as { email?: unknown }
+  const emailNormalizado = typeof email === 'string' ? email.trim().toLowerCase() : ''
+
+  if (!EMAIL_REGEX.test(emailNormalizado)) {
+    res.status(400).json({ message: 'Ingresá un email válido' })
+    return
+  }
+
+  try {
+    await solicitarRecuperacion(emailNormalizado)
+    res.status(200).json({
+      message: 'Si el email está registrado, te enviamos un link para restablecer la contraseña',
+    })
+  } catch (err) {
+    if (err instanceof MailNoConfiguradoError) {
+      res.status(503).json({ message: 'El envío de mails no está disponible en este momento' })
+      return
+    }
+    console.error(err)
+    res.status(500).json({ message: 'No pudimos enviar el mail. Intentá de nuevo más tarde' })
+  }
+}
+
+export async function restablecerContrasenaController(req: Request, res: Response) {
+  const { token, nueva } = (req.body ?? {}) as { token?: unknown; nueva?: unknown }
+
+  if (typeof token !== 'string' || !token) {
+    res.status(400).json({ message: 'El link de recuperación no es válido' })
+    return
+  }
+  if (typeof nueva !== 'string' || nueva.length < 6) {
+    res.status(400).json({ message: 'La contraseña debe tener al menos 6 caracteres' })
+    return
+  }
+
+  try {
+    await restablecerContrasena(token, nueva)
+    res.status(200).json({ message: 'Tu contraseña se actualizó correctamente' })
+  } catch (err) {
+    if (err instanceof TokenRecuperacionInvalidoError) {
+      res.status(400).json({ message: 'El link venció o ya fue usado. Pedí uno nuevo' })
       return
     }
     console.error(err)

@@ -64,6 +64,33 @@ export async function register(datos: RegisterData): Promise<AuthUser> {
   }
 }
 
+function mensajeDeAuth(err: unknown, porDefecto: string): unknown {
+  if (axios.isAxiosError<{ message?: string }>(err)) {
+    if (!err.response) {
+      return new AuthError('No pudimos conectarnos con el servidor. Intentá de nuevo en unos minutos.')
+    }
+    return new AuthError(err.response.data?.message ?? porDefecto)
+  }
+  return err
+}
+
+export async function solicitarRecuperacion(email: string): Promise<string> {
+  try {
+    const { data } = await api.post<{ message: string }>('/auth/recuperar-contrasena', { email })
+    return data.message
+  } catch (err) {
+    throw mensajeDeAuth(err, 'No pudimos enviar el mail. Intentá de nuevo más tarde.')
+  }
+}
+
+export async function restablecerContrasena(token: string, nueva: string): Promise<void> {
+  try {
+    await api.post('/auth/restablecer-contrasena', { token, nueva })
+  } catch (err) {
+    throw mensajeDeAuth(err, 'No pudimos restablecer la contraseña.')
+  }
+}
+
 export function saveSession(token: string, usuario: AuthUser, recordarme: boolean) {
   const storage = recordarme ? localStorage : sessionStorage
   storage.setItem(TOKEN_KEY, token)

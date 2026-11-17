@@ -21,7 +21,9 @@ function Login() {
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
   const location = useLocation()
-  const recienRegistrado = (location.state as { registrado?: boolean } | null)?.registrado === true
+  const estadoNavegacion = location.state as { registrado?: boolean; contrasenaRestablecida?: boolean } | null
+  const recienRegistrado = estadoNavegacion?.registrado === true
+  const contrasenaRestablecida = estadoNavegacion?.contrasenaRestablecida === true
 
   const handleFinish = async (values: LoginFormValues) => {
     setError(null)
@@ -60,6 +62,15 @@ function Login() {
         <Alert
           type="success"
           title="Tu cuenta se creó. Ya podés iniciar sesión."
+          showIcon
+          className={styles.alert}
+        />
+      )}
+
+      {contrasenaRestablecida && !error && (
+        <Alert
+          type="success"
+          title="Tu contraseña se actualizó. Ya podés iniciar sesión."
           showIcon
           className={styles.alert}
         />

@@ -3,11 +3,13 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { env } from '../config/env'
 import { prisma } from '../lib/prisma'
+import { enviarMailRecuperacion, verificarMailDisponible } from './mail.service'
 
 export class InvalidCredentialsError extends Error {}
 export class DuplicateUserError extends Error {}
 export class RolIncorrectoError extends Error {}
 export class ContrasenaActualIncorrectaError extends Error {}
+export class TokenRecuperacionInvalidoError extends Error {}
 
 type Rol = 'DOCENTE' | 'ALUMNO'
 
@@ -134,6 +136,60 @@ export async function cambiarContrasena(idUsuario: number, actual: string, nueva
 
   if (!usuarioDb || !(await bcrypt.compare(actual, usuarioDb.contrasena))) {
     throw new ContrasenaActualIncorrectaError()
+  }
+
+  await prisma.usuario.update({
+    where: { idUsuario },
+    data: { contrasena: await hashearContrasena(nueva) },
+  })
+}
+
+const TIPO_TOKEN_RECUPERACION = 'recuperacion'
+
+function claveDeRecuperacion(contrasenaGuardada: string): string {
+  return `${env.jwtSecret}${contrasenaGuardada}`
+}
+
+export async function solicitarRecuperacion(email: string): Promise<void> {
+  verificarMailDisponible()
+
+  const usuarioDb = await prisma.usuario.findUnique({
+    where: { email: email.trim().toLowerCase() },
+    select: { idUsuario: true, nombre: true, email: true, contrasena: true },
+  })
+
+  if (!usuarioDb) return
+
+  const token = jwt.sign(
+    { sub: String(usuarioDb.idUsuario), tipo: TIPO_TOKEN_RECUPERACION },
+    claveDeRecuperacion(usuarioDb.contrasena),
+    { expiresIn: '30m' },
+  )
+
+  const link = `${env.frontendUrl}/restablecer-contrasena?token=${encodeURIComponent(token)}`
+  enviarMailRecuperacion(usuarioDb.email, usuarioDb.nombre, link).catch((err) => {
+    console.error('No se pudo enviar el mail de recuperación', err)
+  })
+}
+
+export async function restablecerContrasena(token: string, nueva: string): Promise<void> {
+  const decodificado = jwt.decode(token)
+  const idUsuario = typeof decodificado === 'object' && decodificado ? Number(decodificado.sub) : NaN
+  if (!Number.isInteger(idUsuario)) throw new TokenRecuperacionInvalidoError()
+
+  const usuarioDb = await prisma.usuario.findUnique({
+    where: { idUsuario },
+    select: { contrasena: true },
+  })
+  if (!usuarioDb) throw new TokenRecuperacionInvalidoError()
+
+  try {
+    const payload = jwt.verify(token, claveDeRecuperacion(usuarioDb.contrasena))
+    if (typeof payload === 'string' || payload.tipo !== TIPO_TOKEN_RECUPERACION) {
+      throw new TokenRecuperacionInvalidoError()
+    }
+  } catch {
+    throw new TokenRecuperacionInvalidoError()
   }
 
   await prisma.usuario.update({
