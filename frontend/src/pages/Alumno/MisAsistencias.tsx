@@ -1,8 +1,6 @@
 
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import {
-  Button,
   Card,
   Layout,
   Select,
@@ -14,11 +12,9 @@ import {
 } from 'antd'
 import type { TableColumnsType } from 'antd'
 import {
-  ArrowLeftOutlined,
   CalendarOutlined,
-  ScheduleOutlined,
 } from '@ant-design/icons'
-import { ROUTES } from '../../constants/routes'
+import EncabezadoAlumno from '../../components/EncabezadoAlumno/EncabezadoAlumno'
 import styles from './MisAsistencias.module.css'
 import {
   obtenerCursosAlumno,
@@ -28,7 +24,7 @@ import {
   type EstadoAsistenciaAlumno,
 } from '../../services/alumno'
 
-const { Header, Content, Footer } = Layout
+const { Content, Footer } = Layout
 const { Title, Text, Paragraph } = Typography
 
 interface RegistroAsistencia {
@@ -80,8 +76,6 @@ function formatearFecha(fecha: string) {
 }
 
 function MisAsistencias() {
-  const navigate = useNavigate()
-
   const [cursos, setCursos] = useState<CursoAlumno[]>([])
   const [asistencias, setAsistencias] = useState<AsistenciaAlumno[]>([])
   const [cursoSeleccionado, setCursoSeleccionado] =
@@ -283,23 +277,7 @@ function MisAsistencias() {
 
   return (
     <Layout className={styles.layout}>
-      <Header className={styles.header}>
-        <div className={styles.headerInner}>
-          <div className={styles.brand}>
-            <span className={styles.logoMark}>
-              <ScheduleOutlined />
-            </span>
-            <Text className={styles.brandText}>AulaActiva</Text>
-          </div>
-
-          <Button
-            icon={<ArrowLeftOutlined />}
-            onClick={() => navigate(ROUTES.ALUMNO)}
-          >
-            Volver al panel
-          </Button>
-        </div>
-      </Header>
+      <EncabezadoAlumno />
 
       <Content className={styles.content}>
         <div className={styles.container}>
