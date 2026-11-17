@@ -7,6 +7,7 @@ import { prisma } from '../lib/prisma'
 export class InvalidCredentialsError extends Error {}
 export class DuplicateUserError extends Error {}
 export class RolIncorrectoError extends Error {}
+export class ContrasenaActualIncorrectaError extends Error {}
 
 type Rol = 'DOCENTE' | 'ALUMNO'
 
@@ -123,4 +124,20 @@ export async function register(datos: RegisterInput): Promise<AuthUserDTO> {
     }
     throw err
   }
+}
+
+export async function cambiarContrasena(idUsuario: number, actual: string, nueva: string): Promise<void> {
+  const usuarioDb = await prisma.usuario.findUnique({
+    where: { idUsuario },
+    select: { contrasena: true },
+  })
+
+  if (!usuarioDb || !(await bcrypt.compare(actual, usuarioDb.contrasena))) {
+    throw new ContrasenaActualIncorrectaError()
+  }
+
+  await prisma.usuario.update({
+    where: { idUsuario },
+    data: { contrasena: await hashearContrasena(nueva) },
+  })
 }

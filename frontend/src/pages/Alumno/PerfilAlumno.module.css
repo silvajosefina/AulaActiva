@@ -1,0 +1,129 @@
+.layout {
+  min-height: 100vh;
+  background: #f8f4ed;
+}
+
+.content {
+  padding: 0 24px 48px;
+}
+
+.container {
+  width: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+}
+
+.introduccion {
+  margin: 40px 0 28px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: #ede0cc;
+  color: #805e3d;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.titulo {
+  margin: 0 0 12px !important;
+  color: #a47c4e !important;
+  font-size: clamp(30px, 4vw, 42px) !important;
+}
+
+.subtitulo {
+  margin-bottom: 0;
+  color: #6f675c;
+  font-size: 16px;
+}
+
+.cargando {
+  display: flex;
+  justify-content: center;
+  padding: 64px 0;
+}
+
+.card {
+  height: 100%;
+  border: 1px solid #eee5d6;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(55, 43, 24, 0.035);
+}
+
+.identidad {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.avatar {
+  flex-shrink: 0;
+  background: #ede0cc !important;
+  color: #805e3d !important;
+  font-weight: 700;
+}
+
+.nombre {
+  margin: 0 0 4px !important;
+  color: #26211a !important;
+}
+
+.datos :global(.ant-descriptions-item-label) {
+  color: #81786b;
+}
+
+.datos :global(.ant-descriptions-item-content) {
+  color: #26211a;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.cardEncabezado {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.cardIcono {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #ede0cc;
+  color: #805e3d;
+  font-size: 18px;
+}
+
+.cardTitulo {
+  margin: 0 0 2px !important;
+  color: #26211a !important;
+}
+
+.footer {
+  padding: 24px;
+  border-top: 1px solid #e9e4d8;
+  background: #fff;
+  color: #81786b;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .content {
+    padding: 0 16px 32px;
+  }
+
+  .introduccion {
+    margin-top: 28px;
+  }
+}

@@ -65,7 +65,8 @@
 
 /* Botón para cerrar sesión */
 
-.botonSalir {
+.botonSalir,
+.botonPerfil {
   min-height: 36px;
   padding: 0 16px;
   border: 1px solid #ba9680;
@@ -82,13 +83,15 @@
     color 0.2s ease;
 }
 
-.botonSalir:hover {
+.botonSalir:hover,
+.botonPerfil:hover {
   border-color: #98745f;
   background: #98745f;
   color: #fff;
 }
 
-.botonSalir:focus-visible {
+.botonSalir:focus-visible,
+.botonPerfil:focus-visible {
   outline: 3px solid #795b4a;
   outline-offset: 3px;
 }
@@ -850,7 +853,8 @@
     display: none;
   }
 
-  .botonSalir {
+  .botonSalir,
+  .botonPerfil {
     min-height: 34px;
     padding: 0 13px;
   }
@@ -930,6 +934,7 @@
   .botonSemana,
   .botonHoy,
   .botonSalir,
+  .botonPerfil,
   .botonAcceso {
     transition: none;
   }

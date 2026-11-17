@@ -13,4 +13,5 @@ export const ROUTES = {
   ALUMNO_ASISTENCIAS: '/alumno/asistencias',
   ALUMNO_CURSOS: '/alumno/cursos',
   ALUMNO_AGENDA_PERSONAL: '/alumno/agenda-personal',
+  ALUMNO_PERFIL: '/alumno/perfil',
 } as const

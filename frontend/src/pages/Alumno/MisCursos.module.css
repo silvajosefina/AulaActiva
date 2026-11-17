@@ -1,6 +1,6 @@
 
 .contenedor {
-  min-height: 100vh;
+  min-height: calc(100vh - 69px);
   padding: 40px 6%;
   background: #f8f4ed;
   color: #4c4035;
@@ -34,26 +34,6 @@
   margin: 10px 0 0;
   color: #897b6c;
   font-size: 1rem;
-}
-
-.botonVolver {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 20px;
-  border: 1px solid #e2d2bf;
-  border-radius: 12px;
-  background: #fffdf9;
-  color: #94704d;
-  font-size: 0.9rem;
-  font-weight: 700;
-  text-decoration: none;
-  transition: background 0.2s ease, transform 0.2s ease;
-}
-
-.botonVolver:hover {
-  background: #f2e8dc;
-  transform: translateY(-2px);
 }
 
 .seccionFiltro {
