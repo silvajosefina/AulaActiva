@@ -3,6 +3,7 @@ import {
   DocenteNoEncontradoError,
   listarCursosDelDocente,
   listarMateriasDelDocente,
+  obtenerInicioDelDocente,
   obtenerPerfilDelDocente,
   actualizarPasswordDocente,
 } from '../services/docente.service'
@@ -14,6 +15,15 @@ function responderError(res: Response, err: unknown) {
   }
   console.error(err)
   res.status(500).json({ message: 'Error interno del servidor' })
+}
+
+export async function inicioController(req: Request, res: Response) {
+  try {
+    const inicio = await obtenerInicioDelDocente(req.usuario!.idUsuario)
+    res.status(200).json(inicio)
+  } catch (err) {
+    responderError(res, err)
+  }
 }
 
 export async function cursosController(req: Request, res: Response) {

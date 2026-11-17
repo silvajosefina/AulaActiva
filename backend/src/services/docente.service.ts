@@ -50,6 +50,34 @@ export interface PerfilDocenteDTO {
   legajo: number
 }
 
+export type EstadoClaseDTO = 'pendiente' | 'registrada' | 'programada'
+
+export interface ProximaClaseDTO {
+  idCurso: number
+  materia: string
+  comision: string
+  fecha: string
+  dia: string
+  horaInicio: string
+  horaFin: string
+  cantidadAlumnos: number
+  estadoAsistencia: EstadoClaseDTO
+}
+
+export interface InicioDocenteDTO {
+  resumen: {
+    materias: number
+    cursos: number
+    alumnos: number
+    asistenciasPendientes: number
+  }
+  proximasClases: ProximaClaseDTO[]
+}
+
+const DIAS_POR_INDICE = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+
+const DIAS_DE_PROXIMAS_CLASES = 7
+
 function formatearHora(hora: Date): string {
   return hora.toISOString().slice(11, 16)
 }
@@ -88,6 +116,63 @@ async function obtenerLegajoDocente(idUsuario: number): Promise<number> {
 
   if (!docente) throw new DocenteNoEncontradoError()
   return docente.legajoDocente
+}
+
+export async function obtenerInicioDelDocente(idUsuario: number): Promise<InicioDocenteDTO> {
+  const legajoDocente = await obtenerLegajoDocente(idUsuario)
+  const hoy = hoyEnArgentina()
+
+  const cursos = await prisma.curso.findMany({
+    where: { cursosDocente: { some: { legajoDocente } } },
+    include: {
+      materia: { select: { idMateria: true, nombre: true } },
+      horarios: true,
+      cursosAlumno: { select: { legajoAlumno: true } },
+      asistencias: { where: { fecha: hoy.fecha }, select: { idAsistencia: true }, take: 1 },
+    },
+  })
+
+  const proximasClases: ProximaClaseDTO[] = []
+
+  for (let diasHasta = 0; diasHasta < DIAS_DE_PROXIMAS_CLASES; diasHasta++) {
+    const fecha = new Date(hoy.fecha.getTime() + diasHasta * 86400000)
+    const dia = DIAS_POR_INDICE[fecha.getUTCDay()]
+
+    for (const curso of cursos) {
+      for (const horario of curso.horarios.filter((h) => h.dia === dia)) {
+        const asistenciaCargada = curso.asistencias.length > 0
+
+        proximasClases.push({
+          idCurso: curso.idCurso,
+          materia: curso.materia.nombre,
+          comision: curso.comision,
+          fecha: fecha.toISOString().slice(0, 10),
+          dia,
+          horaInicio: formatearHora(horario.horaInicio),
+          horaFin: formatearHora(horario.horaFin),
+          cantidadAlumnos: curso.cursosAlumno.length,
+          estadoAsistencia: diasHasta > 0 ? 'programada' : asistenciaCargada ? 'registrada' : 'pendiente',
+        })
+      }
+    }
+  }
+
+  proximasClases.sort((a, b) => a.fecha.localeCompare(b.fecha) || a.horaInicio.localeCompare(b.horaInicio))
+
+  const cursosConAsistenciaPendiente = new Set(
+    proximasClases.filter((clase) => clase.estadoAsistencia === 'pendiente').map((clase) => clase.idCurso),
+  )
+
+  return {
+    resumen: {
+      materias: new Set(cursos.map((curso) => curso.materia.idMateria)).size,
+      cursos: cursos.length,
+      alumnos: new Set(cursos.flatMap((curso) => curso.cursosAlumno.map((inscripcion) => inscripcion.legajoAlumno)))
+        .size,
+      asistenciasPendientes: cursosConAsistenciaPendiente.size,
+    },
+    proximasClases,
+  }
 }
 
 export async function listarCursosDelDocente(idUsuario: number): Promise<CursoDocenteDTO[]> {
