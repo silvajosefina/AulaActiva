@@ -42,6 +42,23 @@ export interface CursoDocente {
   asistenciaHoyCargada: boolean;
 }
 
+// Nuevas interfaces para el módulo de Mis Alumnos
+export interface AlumnoCursoDTO {
+  idCurso: number;
+  materia: string;
+  comision: string;
+  anio: number;
+  periodo: string;
+}
+
+export interface AlumnoDocente {
+  legajoAlumno: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+  cursos: AlumnoCursoDTO[];
+}
+
 export const getPerfilDocente = async (): Promise<PerfilDocente> => {
   const response = await axios.get(`${API_URL}/docente/perfil`, getAuthHeaders());
   return response.data;
@@ -52,10 +69,8 @@ export const actualizarPasswordDocente = async (datos: { actual: string; nueva: 
   return response.data;
 };
 
-// Nueva función para listar los cursos del docente
 export const getCursosDocente = async (): Promise<CursoDocente[]> => {
   const response = await axios.get(`${API_URL}/docente/cursos`, getAuthHeaders());
-  // Como el backend responde { cursos: [...] }, devolvemos response.data.cursos
   return response.data.cursos;
 };
 
@@ -86,4 +101,11 @@ export interface InicioDocente {
 export const getInicioDocente = async (): Promise<InicioDocente> => {
   const response = await axios.get(`${API_URL}/docente/inicio`, getAuthHeaders());
   return response.data;
+};
+
+
+// Nueva función para listar los alumnos del docente
+export const getAlumnosDocente = async (): Promise<AlumnoDocente[]> => {
+  const response = await axios.get(`${API_URL}/docente/alumnos`, getAuthHeaders());
+  return response.data.alumnos;
 };
