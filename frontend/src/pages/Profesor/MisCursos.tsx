@@ -341,7 +341,7 @@ export default function MisCursos() {
                             type="default"
                             size="middle"
                             onClick={() =>
-                              messageApi.info("Lista de alumnos disponible próximamente.")
+                              navigate(`/profesor/alumnos?materia=${encodeURIComponent(curso.materia.nombre)}`)
                             }
                             style={{ borderRadius: 8 }}
                           >

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Layout,
@@ -13,7 +13,6 @@ import {
   Input,
   Select,
   Table,
-  Progress,
   Card,
   message,
   Drawer,
@@ -35,116 +34,68 @@ import {
 import "dayjs/locale/es";
 import locale from "antd/locale/es_ES";
 import { clearSession, getSessionUser } from "../../services/auth";
+import { getAlumnosDocente, type AlumnoDocente } from "../../services/docenteService";
 import { ROUTES } from "../../constants/routes";
 import "./MisAlumnos.css";
 
 const { Sider, Header, Content } = Layout;
 const { Title, Text } = Typography;
 
-interface Alumno {
-  key: string;
-  legajo: string;
-  nombre: string;
-  apellido: string;
-  email: string;
-  materia: string;
-  comision: string;
-  asistenciaPorcentaje: number;
-  estado: "Regular" | "Promocionado" | "En riesgo";
-}
-
-const alumnosMock: Alumno[] = [
-  {
-    key: "1",
-    legajo: "48201",
-    nombre: "Sofía",
-    apellido: "Martínez",
-    email: "sofia.martinez@mi.unc.edu.ar",
-    materia: "Bases de Datos",
-    comision: "Comisión 1K1",
-    asistenciaPorcentaje: 92,
-    estado: "Promocionado",
-  },
-  {
-    key: "2",
-    legajo: "48102",
-    nombre: "Mateo",
-    apellido: "González",
-    email: "mateo.gonzalez@mi.unc.edu.ar",
-    materia: "Bases de Datos",
-    comision: "Comisión 1K1",
-    asistenciaPorcentaje: 78,
-    estado: "Regular",
-  },
-  {
-    key: "3",
-    legajo: "48344",
-    nombre: "Valentina",
-    apellido: "Rodríguez",
-    email: "valen.rodriguez@mi.unc.edu.ar",
-    materia: "Programación Web",
-    comision: "Comisión 2K1",
-    asistenciaPorcentaje: 88,
-    estado: "Regular",
-  },
-  {
-    key: "4",
-    legajo: "47990",
-    nombre: "Lucas",
-    apellido: "Fernández",
-    email: "lucas.fernandez@mi.unc.edu.ar",
-    materia: "Programación Web",
-    comision: "Comisión 2K1",
-    asistenciaPorcentaje: 65,
-    estado: "En riesgo",
-  },
-  {
-    key: "5",
-    legajo: "48512",
-    nombre: "Camila",
-    apellido: "Gómez",
-    email: "camila.gomez@mi.unc.edu.ar",
-    materia: "Matemática Discreta",
-    comision: "Comisión 101",
-    asistenciaPorcentaje: 95,
-    estado: "Promocionado",
-  },
-];
-
 export default function MisAlumnos() {
   const navigate = useNavigate();
   const usuario = getSessionUser();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [busqueda, setBusqueda] = useState("");
-  const [comisionFiltro, setComisionFiltro] = useState<string>("todas");
+  const [materiaFiltro, setMateriaFiltro] = useState<string>("todas");
+  const [alumnos, setAlumnos] = useState<AlumnoDocente[]>([]);
+  const [cargando, setCargando] = useState<boolean>(true);
 
   const [messageApi, contextHolder] = message.useMessage();
 
   const nombreCompleto = usuario
     ? `${usuario.nombre} ${usuario.apellido}`
-    : "Fernández";
+    : "Docente";
   const iniciales = usuario
     ? `${usuario.nombre[0]}${usuario.apellido[0]}`
-    : "PF";
+    : "DOC";
+
+  useEffect(() => {
+    const cargarAlumnos = async () => {
+      try {
+        setCargando(true);
+        const data = await getAlumnosDocente();
+        setAlumnos(data);
+      } catch (error) {
+        console.error("Error al cargar los alumnos:", error);
+        messageApi.error("No se pudieron cargar los alumnos del servidor.");
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    cargarAlumnos();
+  }, [messageApi]);
 
   const cerrarSesion = () => {
     clearSession();
     navigate(ROUTES.LOGIN);
   };
 
-  const alumnosFiltrados = alumnosMock.filter((alumno) => {
+  // Filtrado de alumnos por nombre, apellido, legajo o materia
+  const alumnosFiltrados = alumnos.filter((alumno) => {
     const coincideBusqueda =
       alumno.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
       alumno.apellido.toLowerCase().includes(busqueda.toLowerCase()) ||
-      alumno.legajo.includes(busqueda);
+      alumno.legajoAlumno.toString().includes(busqueda);
 
-    const coincideComision =
-      comisionFiltro === "todas" || alumno.comision === comisionFiltro;
+    const coincideMateria =
+      materiaFiltro === "todas" ||
+      alumno.cursos.some((c) => c.materia === materiaFiltro);
 
-    return coincideBusqueda && coincideComision;
+    return coincideBusqueda && coincideMateria;
   });
 
-const columnas: ColumnsType<Alumno> = [
+  const columnas: ColumnsType<AlumnoDocente> = [
     {
       title: "Alumno",
       dataIndex: "nombre",
@@ -168,60 +119,34 @@ const columnas: ColumnsType<Alumno> = [
     },
     {
       title: "Legajo",
-      dataIndex: "legajo",
-      key: "legajo",
+      dataIndex: "legajoAlumno",
+      key: "legajoAlumno",
       width: 110,
       render: (legajo) => <Text code>{legajo}</Text>,
     },
     {
-      title: "Materia / Comisión",
-      key: "materiaComision",
+      title: "Materias y Comisiones",
+      key: "cursos",
       render: (_, record) => (
-        <div>
-          <Text strong style={{ fontSize: 13, display: "block" }}>
-            {record.materia}
-          </Text>
-          <Text type="secondary" style={{ fontSize: 12 }}>
-            {record.comision}
-          </Text>
-        </div>
+        <Space direction="vertical" size={2}>
+          {record.cursos.map((curso, idx) => (
+            <div key={idx}>
+              <Text strong style={{ fontSize: 13 }}>
+                {curso.materia}
+              </Text>{" "}
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                ({curso.comision} - {curso.periodo})
+              </Text>
+            </div>
+          ))}
+        </Space>
       ),
     },
     {
-      title: "Asistencia",
-      dataIndex: "asistenciaPorcentaje",
-      key: "asistenciaPorcentaje",
-      width: 200,
-      render: (porcentaje) => {
-        let color = "#bc9150";
-        if (porcentaje < 75) color = "#ff4d4f";
-        else if (porcentaje >= 90) color = "#52c41a";
-
-        return (
-          <div style={{ paddingRight: 12 }}>
-            <Progress
-              percent={porcentaje}
-              size="small"
-              strokeColor={color}
-              format={(p) => `${p}%`}
-            />
-          </div>
-        );
-      },
-    },
-    {
-      title: "Estado",
-      dataIndex: "estado",
+      title: "Estado Inscripto",
       key: "estado",
       width: 140,
-      render: (estado: Alumno["estado"]) => {
-        let colorTag = "default";
-        if (estado === "Promocionado") colorTag = "green";
-        if (estado === "Regular") colorTag = "gold";
-        if (estado === "En riesgo") colorTag = "red";
-
-        return <Tag color={colorTag}>{estado}</Tag>;
-      },
+      render: () => <Tag color="gold">Regular</Tag>,
     },
   ];
 
@@ -233,7 +158,7 @@ const columnas: ColumnsType<Alumno> = [
     { key: "materias", icon: <BookOutlined />, label: "Materias" },
   ];
 
-const menuUsuario = {
+  const menuUsuario = {
     items: [
       { key: "perfil", label: "Mi perfil", icon: <UserOutlined /> },
       { key: "salir", label: "Cerrar sesión", icon: <LogoutOutlined /> },
@@ -390,21 +315,19 @@ const menuUsuario = {
                   Mis Alumnos
                 </Title>
                 <Text type="secondary" style={{ fontSize: 14 }}>
-                  Listado y seguimiento académico por comisión
+                  Listado y seguimiento de estudiantes inscriptos en tus cursos
                 </Text>
               </div>
 
               <div className="alumnos-acciones-header">
                 <Select
                   defaultValue="todas"
-                  style={{ width: 180 }}
-                  onChange={(val) => setComisionFiltro(val)}
+                  style={{ width: 200 }}
+                  onChange={(val) => setMateriaFiltro(val)}
                   suffixIcon={<FilterOutlined style={{ color: "#9a9284" }} />}
                   options={[
-                    { value: "todas", label: "Todas las comisiones" },
-                    { value: "Comisión 1K1", label: "Comisión 1K1" },
-                    { value: "Comisión 2K1", label: "Comisión 2K1" },
-                    { value: "Comisión 101", label: "Comisión 101" },
+                    { value: "todas", label: "Todas las materias" },
+                    // Podés agregar opciones dinámicas o fijas según prefieras
                   ]}
                 />
 
@@ -423,6 +346,8 @@ const menuUsuario = {
               <Table
                 columns={columnas}
                 dataSource={alumnosFiltrados}
+                rowKey="legajoAlumno"
+                loading={cargando}
                 pagination={{ pageSize: 6, showSizeChanger: false }}
                 scroll={{ x: 600 }}
               />

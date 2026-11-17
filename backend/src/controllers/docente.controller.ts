@@ -6,6 +6,7 @@ import {
   obtenerInicioDelDocente,
   obtenerPerfilDelDocente,
   actualizarPasswordDocente,
+  listarAlumnosDelDocente,
 } from '../services/docente.service'
 
 function responderError(res: Response, err: unknown) {
@@ -67,6 +68,15 @@ export async function actualizarPasswordController(req: Request, res: Response) 
     if (err.message === 'La contraseña actual es incorrecta') {
       return res.status(400).json({ message: err.message })
     }
+    responderError(res, err)
+  }
+}
+
+export async function alumnosController(req: Request, res: Response) {
+  try {
+    const alumnos = await listarAlumnosDelDocente(req.usuario!.idUsuario)
+    res.status(200).json({ alumnos })
+  } catch (err) {
     responderError(res, err)
   }
 }

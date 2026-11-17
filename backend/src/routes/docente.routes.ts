@@ -4,7 +4,8 @@ import {
   inicioController,
   materiasController,
   perfilController, 
-  actualizarPasswordController 
+  actualizarPasswordController,
+  alumnosController 
 } from '../controllers/docente.controller'
 import { requireAuth, requireRol } from '../middlewares/auth.middleware'
 
@@ -18,5 +19,6 @@ router.get('/cursos', cursosController)
 router.get('/materias', materiasController)
 router.get('/perfil', perfilController)
 router.put('/perfil/password', actualizarPasswordController)
+router.get('/alumnos', alumnosController)
 
 export default router

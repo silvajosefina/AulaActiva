@@ -78,6 +78,20 @@ const DIAS_POR_INDICE = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', '
 
 const DIAS_DE_PROXIMAS_CLASES = 7
 
+export interface AlumnoDocenteDTO {
+  legajoAlumno: number
+  nombre: string
+  apellido: string
+  email: string
+  cursos: {
+    idCurso: number
+    materia: string
+    comision: string
+    anio: number
+    periodo: string
+  }[]
+}
+
 function formatearHora(hora: Date): string {
   return hora.toISOString().slice(11, 16)
 }
@@ -246,6 +260,59 @@ export async function listarMateriasDelDocente(idUsuario: number): Promise<Mater
       horasSemanales: Math.round((Math.max(0, ...minutosPorCurso) / 60) * 10) / 10,
     }
   })
+}
+
+// Nueva función para listar los alumnos de todos los cursos del docente
+export async function listarAlumnosDelDocente(idUsuario: number): Promise<AlumnoDocenteDTO[]> {
+  const legajoDocente = await obtenerLegajoDocente(idUsuario)
+
+  const cursos = await prisma.curso.findMany({
+    where: { cursosDocente: { some: { legajoDocente } } },
+    include: {
+      materia: true,
+      cursosAlumno: {
+        include: {
+          alumno: {
+            include: {
+              usuario: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: [{ materia: { nombre: 'asc' } }, { comision: 'asc' }],
+  })
+
+  const mapaAlumnos = new Map<number, AlumnoDocenteDTO>()
+
+  for (const curso of cursos) {
+    for (const inscripcion of curso.cursosAlumno) {
+      const { alumno } = inscripcion
+      if (!alumno || !alumno.usuario) continue
+
+      if (!mapaAlumnos.has(alumno.legajoAlumno)) {
+        mapaAlumnos.set(alumno.legajoAlumno, {
+          legajoAlumno: alumno.legajoAlumno,
+          nombre: alumno.usuario.nombre,
+          apellido: alumno.usuario.apellido,
+          email: alumno.usuario.email,
+          cursos: [],
+        })
+      }
+
+      mapaAlumnos.get(alumno.legajoAlumno)!.cursos.push({
+        idCurso: curso.idCurso,
+        materia: curso.materia.nombre,
+        comision: curso.comision,
+        anio: curso.anio,
+        periodo: curso.periodo,
+      })
+    }
+  }
+
+  return Array.from(mapaAlumnos.values()).sort(
+    (a, b) => a.apellido.localeCompare(b.apellido) || a.nombre.localeCompare(b.nombre)
+  )
 }
 
 export async function obtenerPerfilDelDocente(idUsuario: number): Promise<PerfilDocenteDTO> {
