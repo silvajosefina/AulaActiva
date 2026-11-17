@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Layout,
@@ -15,6 +15,7 @@ import {
   Table,
   message,
   Drawer,
+  Alert,
 } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import {
@@ -32,62 +33,32 @@ import {
   SearchOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons";
+import axios from "axios";
+import dayjs from "dayjs";
 import "dayjs/locale/es";
 import locale from "antd/locale/es_ES";
 import { clearSession, getSessionUser } from "../../services/auth";
 import { ROUTES } from "../../constants/routes";
+import {
+  getInicioDocente,
+  type InicioDocente,
+  type ProximaClase,
+} from "../../services/docenteService";
 import "./InicioProfesor.css";
 
 const { Sider, Header, Content } = Layout;
 const { Title, Text } = Typography;
 
-interface ProximaClase {
-  id: number;
-  materiaId: string;
-  materia: string;
-  comisionId: string;
-  comision: string;
-  horario: string;
-  aula: string;
-  alumnosCount: number;
-  estadoAsistencia: "pendiente" | "registrada";
+function describirCuando(clase: ProximaClase): string {
+  const diasHasta = dayjs(clase.fecha).diff(dayjs().startOf("day"), "day");
+  const cuando =
+    diasHasta === 0
+      ? "Hoy"
+      : diasHasta === 1
+        ? "Mañana"
+        : `${clase.dia} ${dayjs(clase.fecha).date()}`;
+  return `${cuando}, ${clase.horaInicio} - ${clase.horaFin} hs`;
 }
-
-const proximasClasesMock: ProximaClase[] = [
-  {
-    id: 1,
-    materiaId: "bd",
-    materia: "Bases de Datos",
-    comisionId: "bd-1k1",
-    comision: "Comisión 1K1",
-    horario: "Hoy, 18:00 - 21:00 hs",
-    aula: "Aula 302",
-    alumnosCount: 32,
-    estadoAsistencia: "pendiente",
-  },
-  {
-    id: 2,
-    materiaId: "programacion",
-    materia: "Programación Web",
-    comisionId: "prog-2k1",
-    comision: "Comisión 2K1",
-    horario: "Mañana, 14:00 - 17:00 hs",
-    aula: "Lab Computación 2",
-    alumnosCount: 28,
-    estadoAsistencia: "pendiente",
-  },
-  {
-    id: 3,
-    materiaId: "matematica",
-    materia: "Matemática Discreta",
-    comisionId: "mat-101",
-    comision: "Comisión 101",
-    horario: "Jueves 29, 08:00 - 11:00 hs",
-    aula: "Aula 105",
-    alumnosCount: 35,
-    estadoAsistencia: "registrada",
-  },
-];
 
 export default function InicioProfesor() {
   const navigate = useNavigate();
@@ -95,6 +66,10 @@ export default function InicioProfesor() {
   const [menuAbierto, setMenuAbierto] = useState(false);
 
   const [messageApi, contextHolder] = message.useMessage();
+  const [inicio, setInicio] = useState<InicioDocente | null>(null);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [intento, setIntento] = useState(0);
 
   const nombreCompleto = usuario
     ? `${usuario.nombre} ${usuario.apellido}`
@@ -108,9 +83,44 @@ export default function InicioProfesor() {
     navigate(ROUTES.LOGIN);
   };
 
-  const irACargarAsistencia = (materiaId?: string, comisionId?: string) => {
+  useEffect(() => {
+    let activo = true;
+    getInicioDocente()
+      .then((datos) => {
+        if (activo) setInicio(datos);
+      })
+      .catch((err) => {
+        if (!activo) return;
+        if (axios.isAxiosError(err) && err.response?.status === 401) {
+          clearSession();
+          navigate(ROUTES.LOGIN);
+          return;
+        }
+        setError(
+          axios.isAxiosError(err) && !err.response
+            ? "No pudimos conectarnos con el servidor. Revisá que el backend esté levantado."
+            : "No pudimos cargar tu resumen. Intentá de nuevo."
+        );
+      })
+      .finally(() => {
+        if (activo) setCargando(false);
+      });
+    return () => {
+      activo = false;
+    };
+  }, [intento, navigate]);
+
+  const reintentar = () => {
+    setCargando(true);
+    setError(null);
+    setIntento((n) => n + 1);
+  };
+
+  const kpi = (valor: number | undefined) => (cargando || valor === undefined ? "–" : valor);
+
+  const irACargarAsistencia = (idCurso?: number) => {
     navigate(ROUTES.PROFESOR_ASISTENCIA, {
-      state: { materiaId, comisionId },
+      state: idCurso === undefined ? undefined : { comisionId: String(idCurso) },
     });
   };
 
@@ -124,7 +134,7 @@ export default function InicioProfesor() {
             {record.materia}
           </Text>
           <Text type="secondary" style={{ fontSize: 12 }}>
-            {record.comision} · {record.aula}
+            Comisión {record.comision}
           </Text>
         </div>
       ),
@@ -135,7 +145,7 @@ export default function InicioProfesor() {
       render: (_, record) => (
         <Space size={6}>
           <ClockCircleOutlined style={{ color: "#8d8676" }} />
-          <Text style={{ fontSize: 13 }}>{record.horario}</Text>
+          <Text style={{ fontSize: 13 }}>{describirCuando(record)}</Text>
         </Space>
       ),
     },
@@ -145,7 +155,7 @@ export default function InicioProfesor() {
       align: "center",
       render: (_, record) => (
         <Text style={{ fontSize: 13, fontWeight: 500 }}>
-          {record.alumnosCount} inscriptos
+          {record.cantidadAlumnos} inscriptos
         </Text>
       ),
     },
@@ -153,22 +163,33 @@ export default function InicioProfesor() {
       title: "ESTADO / ACCIÓN",
       key: "accion",
       align: "right",
-      render: (_, record) =>
-        record.estadoAsistencia === "pendiente" ? (
-          <Button
-            type="primary"
-            size="small"
-            icon={<CalendarOutlined />}
-            onClick={() => irACargarAsistencia(record.materiaId, record.comisionId)}
-            style={{ borderRadius: 6 }}
-          >
-            Cargar asistencia
-          </Button>
-        ) : (
-          <Tag icon={<CheckCircleOutlined />} color="success" style={{ borderRadius: 6, padding: "2px 8px" }}>
-            Asistencia cargada
+      render: (_, record) => {
+        if (record.estadoAsistencia === "pendiente") {
+          return (
+            <Button
+              type="primary"
+              size="small"
+              icon={<CalendarOutlined />}
+              onClick={() => irACargarAsistencia(record.idCurso)}
+              style={{ borderRadius: 6 }}
+            >
+              Cargar asistencia
+            </Button>
+          );
+        }
+        if (record.estadoAsistencia === "registrada") {
+          return (
+            <Tag icon={<CheckCircleOutlined />} color="success" style={{ borderRadius: 6, padding: "2px 8px" }}>
+              Asistencia cargada
+            </Tag>
+          );
+        }
+        return (
+          <Tag icon={<ClockCircleOutlined />} style={{ borderRadius: 6, padding: "2px 8px" }}>
+            Programada
           </Tag>
-        ),
+        );
+      },
     },
   ];
 
@@ -338,12 +359,26 @@ const menuUsuario = {
           <Content className="inicio-content">
             <div className="inicio-encabezado">
               <Title level={2} style={{ margin: 0, color: "#26211a" }}>
-                ¡Buen día, Prof. {nombreCompleto.split(" ")[1] || nombreCompleto}!
+                ¡Buen día, Prof. {usuario?.apellido ?? nombreCompleto}!
               </Title>
               <Text type="secondary" style={{ fontSize: 14 }}>
                 Este es el resumen de tu actividad académica para hoy.
               </Text>
             </div>
+
+            {error && (
+              <Alert
+                type="error"
+                showIcon
+                title={error}
+                style={{ marginBottom: 20 }}
+                action={
+                  <Button size="small" onClick={reintentar}>
+                    Reintentar
+                  </Button>
+                }
+              />
+            )}
 
             <div className="inicio-kpi-grid">
               <div className="inicio-kpi-card">
@@ -352,7 +387,7 @@ const menuUsuario = {
                 </div>
                 <div>
                   <Text type="secondary">Materias asignadas</Text>
-                  <Title level={3} style={{ margin: 0 }}>3</Title>
+                  <Title level={3} style={{ margin: 0 }}>{kpi(inicio?.resumen.materias)}</Title>
                 </div>
               </div>
 
@@ -362,7 +397,7 @@ const menuUsuario = {
                 </div>
                 <div>
                   <Text type="secondary">Cursos / Comisiones</Text>
-                  <Title level={3} style={{ margin: 0 }}>4</Title>
+                  <Title level={3} style={{ margin: 0 }}>{kpi(inicio?.resumen.cursos)}</Title>
                 </div>
               </div>
 
@@ -372,7 +407,7 @@ const menuUsuario = {
                 </div>
                 <div>
                   <Text type="secondary">Total de alumnos</Text>
-                  <Title level={3} style={{ margin: 0 }}>95</Title>
+                  <Title level={3} style={{ margin: 0 }}>{kpi(inicio?.resumen.alumnos)}</Title>
                 </div>
               </div>
 
@@ -383,7 +418,7 @@ const menuUsuario = {
                 <div>
                   <Text type="secondary">Asistencias pendientes</Text>
                   <Title level={3} style={{ margin: 0, color: "#bc9150" }}>
-                    2
+                    {kpi(inicio?.resumen.asistenciasPendientes)}
                   </Title>
                 </div>
               </div>
@@ -465,9 +500,11 @@ const menuUsuario = {
                   </div>
 
                   <Table<ProximaClase>
-                    rowKey="id"
+                    rowKey={(clase) => `${clase.idCurso}-${clase.fecha}-${clase.horaInicio}`}
                     columns={columnasClases}
-                    dataSource={proximasClasesMock}
+                    dataSource={inicio?.proximasClases ?? []}
+                    loading={cargando}
+                    locale={{ emptyText: "No tenés clases en los próximos 7 días." }}
                     pagination={false}
                     className="inicio-table"
                   />

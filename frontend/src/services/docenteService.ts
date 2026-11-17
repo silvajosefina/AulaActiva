@@ -58,3 +58,32 @@ export const getCursosDocente = async (): Promise<CursoDocente[]> => {
   // Como el backend responde { cursos: [...] }, devolvemos response.data.cursos
   return response.data.cursos;
 };
+
+export type EstadoClase = 'pendiente' | 'registrada' | 'programada';
+
+export interface ProximaClase {
+  idCurso: number;
+  materia: string;
+  comision: string;
+  fecha: string;
+  dia: string;
+  horaInicio: string;
+  horaFin: string;
+  cantidadAlumnos: number;
+  estadoAsistencia: EstadoClase;
+}
+
+export interface InicioDocente {
+  resumen: {
+    materias: number;
+    cursos: number;
+    alumnos: number;
+    asistenciasPendientes: number;
+  };
+  proximasClases: ProximaClase[];
+}
+
+export const getInicioDocente = async (): Promise<InicioDocente> => {
+  const response = await axios.get(`${API_URL}/docente/inicio`, getAuthHeaders());
+  return response.data;
+};
