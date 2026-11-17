@@ -1,5 +1,5 @@
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Button,
@@ -7,6 +7,7 @@ import {
   Layout,
   Select,
   Space,
+  Spin,
   Table,
   Tag,
   Typography,
@@ -20,9 +21,12 @@ import {
 import { ROUTES } from '../../constants/routes'
 import styles from './MisAsistencias.module.css'
 import {
-  materiasDemo,
-  type EstadoAsistencia,
-} from '../../data/materiasDemo'
+  obtenerCursosAlumno,
+  obtenerAsistenciasAlumno,
+  type CursoAlumno,
+  type AsistenciaAlumno,
+  type EstadoAsistenciaAlumno,
+} from '../../services/alumno'
 
 const { Header, Content, Footer } = Layout
 const { Title, Text, Paragraph } = Typography
@@ -31,10 +35,15 @@ interface RegistroAsistencia {
   key: string
   fecha: string
   materia: string
-  estado: EstadoAsistencia
+  estado: EstadoAsistenciaAlumno
 }
 
-const estadoTexto: Record<EstadoAsistencia, string> = {
+type EstadoGrafico = Exclude<
+  EstadoAsistenciaAlumno,
+  'SUSPENDIDA'
+>
+
+const estadoTexto: Record<EstadoAsistenciaAlumno, string> = {
   PRESENTE: 'Presente',
   AUSENTE: 'Ausente',
   TARDANZA: 'Tardanza',
@@ -42,13 +51,28 @@ const estadoTexto: Record<EstadoAsistencia, string> = {
   SUSPENDIDA: 'Suspendida',
 }
 
-const estadoCodigo: Record<EstadoAsistencia, string> = {
+const estadoCodigo: Record<EstadoAsistenciaAlumno, string> = {
   PRESENTE: 'P',
   AUSENTE: 'A',
   TARDANZA: 'T',
   JUSTIFICADA: 'J',
   SUSPENDIDA: 'S',
 }
+
+// Colores de los estados, compartidos por ambos gráficos.
+const coloresEstado: Record<EstadoGrafico, string> = {
+  PRESENTE: '#8DBB45',
+  TARDANZA: '#4B91C5',
+  JUSTIFICADA: '#E9A13B',
+  AUSENTE: '#D85B58',
+}
+
+const ordenEstadosGrafico: EstadoGrafico[] = [
+  'PRESENTE',
+  'TARDANZA',
+  'JUSTIFICADA',
+  'AUSENTE',
+]
 
 function formatearFecha(fecha: string) {
   const [anio, mes, dia] = fecha.split('-')
@@ -58,38 +82,182 @@ function formatearFecha(fecha: string) {
 function MisAsistencias() {
   const navigate = useNavigate()
 
-  const [materiaSeleccionada, setMateriaSeleccionada] = useState<number>(
-    materiasDemo[0]?.id ?? 0,
+  const [cursos, setCursos] = useState<CursoAlumno[]>([])
+  const [asistencias, setAsistencias] = useState<AsistenciaAlumno[]>([])
+  const [cursoSeleccionado, setCursoSeleccionado] =
+    useState<number | undefined>(undefined)
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState('')
+
+  // Cargamos los cursos y las asistencias reales del alumno.
+  useEffect(() => {
+    let activo = true
+
+    async function cargarDatos() {
+      try {
+        setCargando(true)
+        setError('')
+
+        const [cursosObtenidos, asistenciasObtenidas] =
+          await Promise.all([
+            obtenerCursosAlumno(),
+            obtenerAsistenciasAlumno(),
+          ])
+
+        if (!activo) return
+
+        setCursos(cursosObtenidos)
+        setAsistencias(asistenciasObtenidas)
+
+        // Seleccionamos el primer curso disponible.
+        if (cursosObtenidos.length > 0) {
+          setCursoSeleccionado(cursosObtenidos[0].idCurso)
+        }
+      } catch (error) {
+        if (!activo) return
+
+        console.error('Error al cargar las asistencias:', error)
+        setError(
+          'No pudimos cargar tus asistencias. Intentá nuevamente más tarde.',
+        )
+      } finally {
+        if (activo) {
+          setCargando(false)
+        }
+      }
+    }
+
+    void cargarDatos()
+
+    return () => {
+      activo = false
+    }
+  }, [])
+
+  const cursoActual = cursos.find(
+    (curso) => curso.idCurso === cursoSeleccionado,
   )
 
-  const materiaActual = materiasDemo.find(
-    (materia) => materia.id === materiaSeleccionada,
+  // Filtramos por curso, para no mezclar comisiones ni períodos.
+  const registros: RegistroAsistencia[] = asistencias
+    .filter(
+      (asistencia) => asistencia.idCurso === cursoSeleccionado,
+    )
+    .map((asistencia) => ({
+      key: String(asistencia.idAsistencia),
+      fecha: asistencia.fecha,
+      materia: asistencia.materia,
+      estado: asistencia.estado,
+    }))
+    .sort((a, b) => a.fecha.localeCompare(b.fecha))
+
+  // Las justificadas y suspendidas no participan
+  // del cálculo del porcentaje de asistencia.
+  const registrosComputables = registros.filter(
+    (registro) =>
+      registro.estado !== 'JUSTIFICADA' &&
+      registro.estado !== 'SUSPENDIDA',
   )
 
-  const registros: RegistroAsistencia[] = materiaActual
-    ? materiaActual.clases
-        .map((clase) => ({
-          key: `${materiaActual.id}-${clase.fecha}`,
-          fecha: formatearFecha(clase.fecha),
-          materia: materiaActual.nombre,
-          estado: clase.estado,
-        }))
-        .sort((a, b) => {
-          const [diaA, mesA, anioA] = a.fecha.split('/')
-          const [diaB, mesB, anioB] = b.fecha.split('/')
+  const cantidadSuspendidas = registros.filter(
+    (registro) => registro.estado === 'SUSPENDIDA',
+  ).length
 
-          const fechaA = `${anioA}-${mesA}-${diaA}`
-          const fechaB = `${anioB}-${mesB}-${diaB}`
+  const cantidadJustificadas = registros.filter(
+    (registro) => registro.estado === 'JUSTIFICADA',
+  ).length
 
-          return fechaA.localeCompare(fechaB)
-        })
-    : []
+  const totalClasesComputables = registrosComputables.length
+
+  const cantidadPresentes = registros.filter(
+    (registro) => registro.estado === 'PRESENTE',
+  ).length
+
+  const cantidadTardanzas = registros.filter(
+    (registro) => registro.estado === 'TARDANZA',
+  ).length
+
+  const cantidadAsistencias = cantidadPresentes + cantidadTardanzas
+
+  const porcentajeAsistencia =
+    totalClasesComputables > 0
+      ? Math.round(
+          (cantidadAsistencias / totalClasesComputables) * 100,
+        )
+      : 0
+
+  // El semáforo evalúa el porcentaje general de asistencia.
+  const estadoSemaforo =
+    totalClasesComputables === 0
+      ? 'sinDatos'
+      : porcentajeAsistencia < 60
+        ? 'rojo'
+        : porcentajeAsistencia < 80
+          ? 'amarillo'
+          : 'verde'
+
+  const claseSemaforo = {
+    rojo: styles.semaforoRojo,
+    amarillo: styles.semaforoAmarillo,
+    verde: styles.semaforoVerde,
+    sinDatos: styles.semaforoSinDatos,
+  }[estadoSemaforo]
+
+  const textoSemaforo = {
+    rojo: 'Asistencia baja',
+    amarillo: 'Asistencia intermedia',
+    verde: 'Buena asistencia',
+    sinDatos: 'Sin datos suficientes',
+  }[estadoSemaforo]
+
+  // El número del porcentaje utiliza el mismo color del semáforo.
+  const clasePorcentaje = {
+    rojo: styles.porcentajeRojo,
+    amarillo: styles.porcentajeAmarillo,
+    verde: styles.porcentajeVerde,
+    sinDatos: '',
+  }[estadoSemaforo]
+
+  // Los gráficos muestran todos los estados, excepto las suspendidas.
+  // Las justificadas aparecen en los gráficos, pero no en el porcentaje.
+  const totalRegistrosGrafico = registros.filter(
+    (registro) => registro.estado !== 'SUSPENDIDA',
+  ).length
+
+  const resumenEstados = ordenEstadosGrafico.map((estado) => ({
+    estado,
+    nombre: estadoTexto[estado],
+    cantidad: registros.filter(
+      (registro) => registro.estado === estado,
+    ).length,
+    color: coloresEstado[estado],
+  }))
+
+  let porcentajeAcumulado = 0
+
+  const segmentosTorta = resumenEstados
+    .filter((item) => item.cantidad > 0)
+    .map((item) => {
+      const inicio = porcentajeAcumulado
+
+      porcentajeAcumulado +=
+        (item.cantidad / totalRegistrosGrafico) * 100
+
+      return `${item.color} ${inicio}% ${porcentajeAcumulado}%`
+    })
+    .join(', ')
+
+  const fondoTorta =
+    totalRegistrosGrafico > 0
+      ? `conic-gradient(${segmentosTorta})`
+      : '#edf0f4'
 
   const columnas: TableColumnsType<RegistroAsistencia> = [
     {
       title: 'Fecha',
       dataIndex: 'fecha',
       key: 'fecha',
+      render: (fecha: string) => formatearFecha(fecha),
     },
     {
       title: 'Materia',
@@ -100,7 +268,7 @@ function MisAsistencias() {
       title: 'Estado',
       dataIndex: 'estado',
       key: 'estado',
-      render: (estado: EstadoAsistencia) => {
+      render: (estado: EstadoAsistenciaAlumno) => {
         const codigo = estadoCodigo[estado]
         const claseEstado = styles[`estado${codigo}`] ?? ''
 
@@ -151,20 +319,31 @@ function MisAsistencias() {
           </div>
 
           <Card className={styles.historialCard} variant="borderless">
-            <div className={styles.tablaEncabezado}>
-              <div>
-                <Title level={4}>
-                  {materiaActual?.nombre ?? 'Sin materia seleccionada'}
-                </Title>
+            {error && (
+              <Paragraph type="danger">
+                {error}
+              </Paragraph>
+            )}
 
-                <Text type="secondary">
-                  {materiaActual?.comision ?? ''}
-                </Text>
+            <div className="tablaEncabezado">
+              <div className={styles.tablaEncabezado}>
+                <div>
+                  <Title level={4}>
+                    {cursoActual?.materia.nombre ??
+                      'Sin materia seleccionada'}
+                  </Title>
+
+                  <Text type="secondary">
+                    {cursoActual
+                      ? `${cursoActual.anio}° año · Comisión ${cursoActual.comision} · ${cursoActual.periodo}`
+                      : ''}
+                  </Text>
+                </div>
+
+                <Tag className={styles.cantidadRegistros}>
+                  {registros.length} registros
+                </Tag>
               </div>
-
-              <Tag className={styles.cantidadRegistros}>
-                {registros.length} registros
-              </Tag>
             </div>
 
             <div>
@@ -172,59 +351,232 @@ function MisAsistencias() {
 
               <Select
                 className={styles.selectorMateria}
-                value={materiaSeleccionada}
-                onChange={(valor) => setMateriaSeleccionada(valor)}
-                options={materiasDemo.map((materia) => ({
-                  value: materia.id,
-                  label: materia.nombre,
+                value={cursoSeleccionado}
+                onChange={setCursoSeleccionado}
+                disabled={cargando || cursos.length === 0}
+                options={cursos.map((curso) => ({
+                  value: curso.idCurso,
+                  label: `${curso.materia.nombre} · Comisión ${curso.comision} · ${curso.periodo}`,
                 }))}
-                style={{ width: '100%', marginTop: 8, marginBottom: 20 }}
+                style={{
+                  width: '100%',
+                  marginTop: 8,
+                  marginBottom: 20,
+                }}
+                placeholder="Seleccioná un curso"
               />
             </div>
 
-            <Table<RegistroAsistencia>
-              columns={columnas}
-              dataSource={registros}
-              pagination={{ pageSize: 6, showSizeChanger: false }}
-              scroll={{ x: 480 }}
-              locale={{
-                emptyText: 'No hay registros de asistencia.',
-              }}
-            />
+            {cargando ? (
+              <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                <Spin tip="Cargando tus asistencias..." />
+              </div>
+            ) : (
+              <>
+                {/* Resumen general de asistencia */}
+                <section className={styles.resumenAsistencia}>
+                  <div className={styles.resumenTexto}>
+                    <Text strong>Porcentaje de asistencia</Text>
 
-            <div className={styles.referencias}>
-              <Text strong>Referencias de estados</Text>
+                    <div className={styles.indicadorPorcentaje}>
+                      <span
+                        className={`${styles.porcentajeValor} ${clasePorcentaje}`}
+                      >
+                        {porcentajeAsistencia}%
+                      </span>
 
-              <Space wrap size={[8, 8]}>
-                {(
-                  [
-                    'PRESENTE',
-                    'AUSENTE',
-                    'TARDANZA',
-                    'JUSTIFICADA',
-                    'SUSPENDIDA',
-                  ] as EstadoAsistencia[]
-                ).map((estado) => {
-                  const codigo = estadoCodigo[estado]
-                  const claseEstado = styles[`estado${codigo}`] ?? ''
+                      <Tag
+                        className={`${styles.semaforoTag} ${claseSemaforo}`}
+                      >
+                        {textoSemaforo}
+                      </Tag>
+                    </div>
 
-                  return (
-                    <Tag
-                      key={estado}
-                      className={`${styles.estadoTag} ${claseEstado}`}
+                    <Text type="secondary">
+                      {cantidadAsistencias} asistencias sobre{' '}
+                      {totalClasesComputables} clases computables.
+                    </Text>
+                  </div>
+
+                  <div className={styles.resumenDatos}>
+                    <div>
+                      <strong>{totalClasesComputables}</strong>
+                      <span>Clases computables</span>
+                    </div>
+
+                    <div>
+                      <strong>{cantidadSuspendidas}</strong>
+                      <span>Suspendidas</span>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Gráficos estadísticos */}
+                <section className={styles.graficos}>
+                  <article className={styles.graficoCard}>
+                    <Title level={5}>Asistencia por estado</Title>
+
+                    <Text type="secondary">
+                      Cantidad de clases según su resultado.
+                    </Text>
+
+                    <div
+                      className={styles.graficoBarras}
+                      role="img"
+                      aria-label="Gráfico de barras con la cantidad de clases por estado"
                     >
-                      {codigo} · {estadoTexto[estado]}
-                    </Tag>
-                  )
-                })}
-              </Space>
-            </div>
+                      {resumenEstados.map((item) => {
+                        const porcentajeBarra =
+                          totalRegistrosGrafico > 0
+                            ? (item.cantidad /
+                                totalRegistrosGrafico) *
+                              100
+                            : 0
+
+                        return (
+                          <div
+                            className={styles.filaBarra}
+                            key={item.estado}
+                          >
+                            <div className={styles.etiquetaBarra}>
+                              <span>{item.nombre}</span>
+                              <strong>{item.cantidad}</strong>
+                            </div>
+
+                            <div className={styles.barraFondo}>
+                              <div
+                                className={styles.barraValor}
+                                style={{
+                                  width: `${porcentajeBarra}%`,
+                                  backgroundColor: item.color,
+                                }}
+                              />
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </article>
+
+                  <article className={styles.graficoCard}>
+                    <Title level={5}>
+                      Distribución de asistencias
+                    </Title>
+
+                    <Text type="secondary">
+                      Proporción de cada estado sobre los registros
+                      no suspendidos.
+                    </Text>
+
+                    <div className={styles.tortaContenedor}>
+                      <div
+                        className={styles.graficoTorta}
+                        style={{ background: fondoTorta }}
+                        role="img"
+                        aria-label="Gráfico circular con la distribución de estados de asistencia"
+                      >
+                        <div className={styles.centroTorta}>
+                          <strong>{totalRegistrosGrafico}</strong>
+                          <span>Registros</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={styles.leyendaTorta}>
+                      {resumenEstados.map((item) => (
+                        <div
+                          className={styles.itemLeyenda}
+                          key={item.estado}
+                        >
+                          <span
+                            className={styles.puntoLeyenda}
+                            style={{ backgroundColor: item.color }}
+                          />
+
+                          <span>{item.nombre}</span>
+                          <strong>{item.cantidad}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  </article>
+                </section>
+
+                {cantidadJustificadas > 0 && (
+                  <p className={styles.notaSuspendidas}>
+                    Hay {cantidadJustificadas}{' '}
+                    {cantidadJustificadas === 1
+                      ? 'clase justificada'
+                      : 'clases justificadas'}
+                    . No se incluyen en el cálculo del porcentaje de
+                    asistencia.
+                  </p>
+                )}
+
+                {cantidadSuspendidas > 0 && (
+                  <p className={styles.notaSuspendidas}>
+                    Hay {cantidadSuspendidas}{' '}
+                    {cantidadSuspendidas === 1
+                      ? 'clase suspendida'
+                      : 'clases suspendidas'}
+                    . No se incluyen en el cálculo del porcentaje ni
+                    en los gráficos estadísticos.
+                  </p>
+                )}
+
+                <Title level={5} className={styles.tituloTabla}>
+                  Historial de clases
+                </Title>
+
+                <Table<RegistroAsistencia>
+                  columns={columnas}
+                  dataSource={registros}
+                  loading={cargando}
+                  pagination={{
+                    pageSize: 6,
+                    showSizeChanger: false,
+                  }}
+                  scroll={{ x: 480 }}
+                  locale={{
+                    emptyText: 'No hay registros de asistencia.',
+                  }}
+                />
+
+                <div className={styles.referencias}>
+                  <Text strong>Referencias de estados</Text>
+
+                  <Space wrap size={[8, 8]}>
+                    {(
+                      [
+                        'PRESENTE',
+                        'AUSENTE',
+                        'TARDANZA',
+                        'JUSTIFICADA',
+                        'SUSPENDIDA',
+                      ] as EstadoAsistenciaAlumno[]
+                    ).map((estado) => {
+                      const codigo = estadoCodigo[estado]
+                      const claseEstado =
+                        styles[`estado${codigo}`] ?? ''
+
+                      return (
+                        <Tag
+                          key={estado}
+                          className={`${styles.estadoTag} ${claseEstado}`}
+                        >
+                          {codigo} · {estadoTexto[estado]}
+                        </Tag>
+                      )
+                    })}
+                  </Space>
+                </div>
+              </>
+            )}
           </Card>
 
-          <p className={styles.notaDemo}>
-            Información de demostración. Los datos son ficticios y se
-            reemplazarán cuando se conecte el sistema con la información real.
-          </p>
+          <Paragraph type="secondary">
+            Los registros corresponden a las asistencias registradas
+            para tus cursos.
+          </Paragraph>
         </div>
       </Content>
 

@@ -1,13 +1,15 @@
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styles from './MisCursos.module.css'
 import { ROUTES } from '../../constants/routes'
 import {
-  materiasDemo,
-  type Materia,
-  type EstadoAsistencia,
-} from '../../data/materiasDemo'
+  obtenerCursosAlumno,
+  obtenerAsistenciasAlumno,
+  type CursoAlumno,
+  type AsistenciaAlumno,
+  type EstadoAsistenciaAlumno,
+} from '../../services/alumno'
 
 const diasOrden = [
   'Lunes',
@@ -30,11 +32,11 @@ function obtenerNombreMes(mes: string) {
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
   ]
 
-  return nombres[Number(mes) - 1]
+  return nombres[Number(mes) - 1] ?? mes
 }
 
-function obtenerNombreEstado(estado: EstadoAsistencia) {
-  const nombres: Record<EstadoAsistencia, string> = {
+function obtenerNombreEstado(estado: EstadoAsistenciaAlumno) {
+  const nombres: Record<EstadoAsistenciaAlumno, string> = {
     PRESENTE: 'Presente',
     TARDANZA: 'Tardanza',
     AUSENTE: 'Ausente',
@@ -46,15 +48,69 @@ function obtenerNombreEstado(estado: EstadoAsistencia) {
 }
 
 function MisCursos() {
-  const [materiaAbierta, setMateriaAbierta] = useState<number | null>(null)
+  const [cursos, setCursos] = useState<CursoAlumno[]>([])
+  const [asistencias, setAsistencias] = useState<AsistenciaAlumno[]>([])
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState(false)
+
+  const [cursoAbierto, setCursoAbierto] = useState<number | null>(null)
   const [periodo, setPeriodo] = useState('TODOS')
 
-  const materiasFiltradas = useMemo(() => {
-    return materiasDemo.map((materia: Materia) => {
+  // Consultamos los cursos y las asistencias del alumno autenticado.
+  useEffect(() => {
+    let activo = true
+
+    async function cargarDatos() {
+      try {
+        const [cursosRecibidos, asistenciasRecibidas] = await Promise.all([
+          obtenerCursosAlumno(),
+          obtenerAsistenciasAlumno(),
+        ])
+
+        if (activo) {
+          setCursos(cursosRecibidos)
+          setAsistencias(asistenciasRecibidas)
+        }
+      } catch (err) {
+        console.error('Error al cargar los cursos del alumno:', err)
+
+        if (activo) {
+          setError(true)
+        }
+      } finally {
+        if (activo) {
+          setCargando(false)
+        }
+      }
+    }
+
+    cargarDatos()
+
+    return () => {
+      activo = false
+    }
+  }, [])
+
+  // Generamos los meses disponibles a partir de las asistencias reales.
+  const periodosDisponibles = useMemo(() => {
+    return [...new Set(
+      asistencias.map((asistencia) => asistencia.fecha.slice(0, 7)),
+    )].sort((a, b) => b.localeCompare(a))
+  }, [asistencias])
+
+  // Relacionamos cada curso con sus propias asistencias mediante idCurso.
+  const cursosFiltrados = useMemo(() => {
+    return cursos.map((curso) => {
+      const clasesDelCurso = asistencias.filter(
+        (asistencia) => asistencia.idCurso === curso.idCurso,
+      )
+
       const clasesFiltradas =
         periodo === 'TODOS'
-          ? materia.clases
-          : materia.clases.filter((clase) => clase.fecha.startsWith(periodo))
+          ? clasesDelCurso
+          : clasesDelCurso.filter(
+              (clase) => clase.fecha.startsWith(periodo),
+            )
 
       const clasesComputables = clasesFiltradas.filter(
         (clase) =>
@@ -90,7 +146,7 @@ function MisCursos() {
           : null
 
       return {
-        ...materia,
+        ...curso,
         clasesFiltradas,
         presentes,
         tardanzas,
@@ -101,11 +157,11 @@ function MisCursos() {
         porcentaje,
       }
     })
-  }, [periodo])
+  }, [cursos, asistencias, periodo])
 
   const nombrePeriodo =
     periodo === 'TODOS'
-      ? 'Todo el período'
+      ? 'Todos los períodos'
       : `${obtenerNombreMes(periodo.slice(5))} ${periodo.slice(0, 4)}`
 
   return (
@@ -124,165 +180,221 @@ function MisCursos() {
         </Link>
       </header>
 
-      <section className={styles.seccionFiltro}>
-        <div>
-          <h2>Mis materias</h2>
-          <p>Seleccioná una materia para consultar sus detalles.</p>
-        </div>
+      {cargando ? (
+        <p className={styles.mensajeEstado}>
+          Cargando tus cursos y asistencias...
+        </p>
+      ) : error ? (
+        <p className={styles.mensajeError} role="alert">
+          No pudimos cargar tus cursos. Verificá tu conexión e intentá
+          nuevamente más tarde.
+        </p>
+      ) : cursos.length === 0 ? (
+        <p className={styles.sinCursos}>
+          Todavía no tenés cursos asignados.
+        </p>
+      ) : (
+        <>
+          <section className={styles.seccionFiltro}>
+            <div>
+              <h2>Mis materias</h2>
+              <p>Seleccioná un curso para consultar sus detalles.</p>
+            </div>
 
-        <label className={styles.filtro}>
-          <span>Período:</span>
-          <select
-            value={periodo}
-            onChange={(event) => setPeriodo(event.target.value)}
-          >
-            <option value="TODOS">Todo el período</option>
-            <option value="2026-10">Octubre 2026</option>
-            <option value="2026-11">Noviembre 2026</option>
-          </select>
-        </label>
-      </section>
-
-      <p className={styles.textoPeriodo}>
-        Mostrando información de: <strong>{nombrePeriodo}</strong>
-      </p>
-
-      <section className={styles.listaMaterias}>
-        {materiasFiltradas.map((materia) => {
-          const estaAbierta = materiaAbierta === materia.id
-
-          return (
-            <article className={styles.tarjetaMateria} key={materia.id}>
-              <button
-                type="button"
-                className={styles.cabeceraTarjeta}
-                onClick={() =>
-                  setMateriaAbierta(estaAbierta ? null : materia.id)
-                }
-                aria-expanded={estaAbierta}
+            <label className={styles.filtro}>
+              <span>Período:</span>
+              <select
+                value={periodo}
+                onChange={(event) => setPeriodo(event.target.value)}
               >
-                <div className={styles.infoMateria}>
-                  <span className={styles.iconoMateria}>▣</span>
+                <option value="TODOS">Todos los períodos</option>
 
-                  <div>
-                    <h3>{materia.nombre}</h3>
-                    <p>{materia.comision}</p>
-                    <p className={styles.nombreDocente}>{materia.docente}</p>
-                  </div>
-                </div>
+                {periodosDisponibles.map((mes) => (
+                  <option key={mes} value={mes}>
+                    {obtenerNombreMes(mes.slice(5))} {mes.slice(0, 4)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </section>
 
-                <div className={styles.resumenMateria}>
-                  <span className={styles.porcentaje}>
-                    {materia.porcentaje === null
-                      ? 'Sin datos'
-                      : `${materia.porcentaje}%`}
-                  </span>
-                  <span className={styles.textoAsistencia}>Asistencia</span>
-                  <span className={styles.flecha}>
-                    {estaAbierta ? '⌃' : '⌄'}
-                  </span>
-                </div>
-              </button>
+          <p className={styles.textoPeriodo}>
+            Mostrando información de: <strong>{nombrePeriodo}</strong>
+          </p>
 
-              {estaAbierta && (
-                <div className={styles.detalleMateria}>
-                  <div className={styles.bloqueHorarios}>
-                    <h4>Horarios de cursada</h4>
+          <section className={styles.listaMaterias}>
+            {cursosFiltrados.map((curso) => {
+              const estaAbierta = cursoAbierto === curso.idCurso
 
-                    <div className={styles.listaHorarios}>
-                      {[...materia.horarios]
-                        .sort((a, b) => {
-                          const diferencia =
-                            diasOrden.indexOf(a.dia) - diasOrden.indexOf(b.dia)
+              const clasePorcentaje =
+                curso.porcentaje === null
+                  ? ''
+                  : curso.porcentaje < 60
+                    ? styles.porcentajeRojo
+                    : curso.porcentaje < 80
+                      ? styles.porcentajeAmarillo
+                      : styles.porcentajeVerde
 
-                          return diferencia || a.inicio.localeCompare(b.inicio)
-                        })
-                        .map((horario, indice) => (
-                          <div className={styles.horario} key={indice}>
-                            <span>{horario.dia}</span>
-                            <strong>
-                              {horario.inicio} a {horario.fin} hs
-                            </strong>
+              return (
+                <article
+                  className={styles.tarjetaMateria}
+                  key={curso.idCurso}
+                >
+                  <button
+                    type="button"
+                    className={styles.cabeceraTarjeta}
+                    onClick={() =>
+                      setCursoAbierto(
+                        estaAbierta ? null : curso.idCurso,
+                      )
+                    }
+                    aria-expanded={estaAbierta}
+                  >
+                    <div className={styles.infoMateria}>
+                      <span className={styles.iconoMateria}>▣</span>
+
+                      <div>
+                        <h3>{curso.materia.nombre}</h3>
+                        <p>
+                          {curso.anio}° Año · Comisión {curso.comision}
+                        </p>
+                        <p className={styles.nombreDocente}>
+                          {curso.docentes.length > 0
+                            ? curso.docentes.join(', ')
+                            : 'Docente no asignado'}
+                        </p>
+                        <p>{curso.periodo}</p>
+                      </div>
+                    </div>
+
+                    <div className={styles.resumenMateria}>
+                      <span className={`${styles.porcentaje} ${clasePorcentaje}`}>
+                        {curso.porcentaje === null
+                          ? 'Sin datos'
+                          : `${curso.porcentaje}%`}
+                      </span>
+                      <span className={styles.textoAsistencia}>
+                        Asistencia
+                      </span>
+                      <span className={styles.flecha}>
+                        {estaAbierta ? '⌃' : '⌄'}
+                      </span>
+                    </div>
+                  </button>
+
+                  {estaAbierta && (
+                    <div className={styles.detalleMateria}>
+                      <div className={styles.bloqueHorarios}>
+                        <h4>Horarios de cursada</h4>
+
+                        {curso.horarios.length === 0 ? (
+                          <p className={styles.sinClases}>
+                            No hay horarios registrados.
+                          </p>
+                        ) : (
+                          <div className={styles.listaHorarios}>
+                            {[...curso.horarios]
+                              .sort((a, b) => {
+                                const diferencia =
+                                  diasOrden.indexOf(a.dia) -
+                                  diasOrden.indexOf(b.dia)
+
+                                return diferencia ||
+                                  a.inicio.localeCompare(b.inicio)
+                              })
+                              .map((horario, indice) => (
+                                <div
+                                  className={styles.horario}
+                                  key={`${horario.dia}-${horario.inicio}-${indice}`}
+                                >
+                                  <span>{horario.dia}</span>
+                                  <strong>
+                                    {horario.inicio} a {horario.fin} hs
+                                  </strong>
+                                </div>
+                              ))}
                           </div>
-                        ))}
+                        )}
+                      </div>
+
+                      <div className={styles.bloqueEstadisticas}>
+                        <h4>Resumen de asistencia</h4>
+
+                        <div className={styles.estadisticas}>
+                          <div className={styles.estadistica}>
+                            <strong>{curso.presentes}</strong>
+                            <span>Presentes</span>
+                          </div>
+
+                          <div className={styles.estadistica}>
+                            <strong>{curso.tardanzas}</strong>
+                            <span>Tardanzas</span>
+                          </div>
+
+                          <div className={styles.estadistica}>
+                            <strong>{curso.ausentes}</strong>
+                            <span>Ausentes</span>
+                          </div>
+
+                          <div className={styles.estadistica}>
+                            <strong>{curso.justificadas}</strong>
+                            <span>Justificadas</span>
+                          </div>
+
+                          <div className={styles.estadistica}>
+                            <strong>{curso.total}</strong>
+                            <span>Clases computadas</span>
+                          </div>
+                        </div>
+
+                        <p className={styles.aclaracion}>
+                          Las tardanzas cuentan como asistencia. Las
+                          ausencias justificadas y las clases suspendidas
+                          no se incluyen en el cálculo del porcentaje.
+                        </p>
+                      </div>
+
+                      <div className={styles.bloqueClases}>
+                        <h4>Registro de clases</h4>
+
+                        {curso.clasesFiltradas.length === 0 ? (
+                          <p className={styles.sinClases}>
+                            No hay clases registradas para este período.
+                          </p>
+                        ) : (
+                          <div className={styles.listaClases}>
+                            {[...curso.clasesFiltradas]
+                              .sort((a, b) =>
+                                a.fecha.localeCompare(b.fecha) ||
+                                a.idAsistencia - b.idAsistencia,
+                              )
+                              .map((clase) => (
+                                <div
+                                  className={styles.filaClase}
+                                  key={clase.idAsistencia}
+                                >
+                                  <span>{formatearFecha(clase.fecha)}</span>
+
+                                  <span
+                                    className={`${styles.estado} ${
+                                      styles[clase.estado.toLowerCase()]
+                                    }`}
+                                  >
+                                    {obtenerNombreEstado(clase.estado)}
+                                  </span>
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-
-                  <div className={styles.bloqueEstadisticas}>
-                    <h4>Resumen de asistencia</h4>
-
-                    <div className={styles.estadisticas}>
-                      <div className={styles.estadistica}>
-                        <strong>{materia.presentes}</strong>
-                        <span>Presentes</span>
-                      </div>
-
-                      <div className={styles.estadistica}>
-                        <strong>{materia.tardanzas}</strong>
-                        <span>Tardanzas</span>
-                      </div>
-
-                      <div className={styles.estadistica}>
-                        <strong>{materia.ausentes}</strong>
-                        <span>Ausentes</span>
-                      </div>
-
-                      <div className={styles.estadistica}>
-                        <strong>{materia.justificadas}</strong>
-                        <span>Justificadas</span>
-                      </div>
-
-                      <div className={styles.estadistica}>
-                        <strong>{materia.total}</strong>
-                        <span>Clases computadas</span>
-                      </div>
-                    </div>
-
-                    <p className={styles.aclaracion}>
-                      Las tardanzas cuentan como asistencia. Las ausencias
-                      justificadas y las clases suspendidas no se incluyen
-                      en el cálculo del porcentaje.
-                    </p>
-                  </div>
-
-                  <div className={styles.bloqueClases}>
-                    <h4>Registro de clases</h4>
-
-                    {materia.clasesFiltradas.length === 0 ? (
-                      <p className={styles.sinClases}>
-                        No hay clases registradas para este período.
-                      </p>
-                    ) : (
-                      <div className={styles.listaClases}>
-                        {[...materia.clasesFiltradas]
-                          .sort((a, b) => a.fecha.localeCompare(b.fecha))
-                          .map((clase) => (
-                            <div className={styles.filaClase} key={clase.fecha}>
-                              <span>{formatearFecha(clase.fecha)}</span>
-
-                              <span
-                                className={`${styles.estado} ${
-                                  styles[clase.estado.toLowerCase()]
-                                }`}
-                              >
-                                {obtenerNombreEstado(clase.estado)}
-                              </span>
-                            </div>
-                          ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </article>
-          )
-        })}
-      </section>
-
-      <p className={styles.notaDemo}>
-        Información de demostración. Los datos son ficticios y se reemplazarán
-        cuando se conecte el sistema con la información real.
-      </p>
+                  )}
+                </article>
+              )
+            })}
+          </section>
+        </>
+      )}
     </main>
   )
 }

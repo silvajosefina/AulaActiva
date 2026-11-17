@@ -46,6 +46,7 @@ model Alumno {
 
   usuario      Usuario       @relation(fields: [idUsuario], references: [idUsuario])
   cursosAlumno CursoAlumno[]
+  eventosPersonales EventoPersonal[]
 
   @@map("alumnos")
 }
@@ -72,6 +73,7 @@ model Curso {
   cursosAlumno  CursoAlumno[]
   horarios      Horario[]
   asistencias   Asistencia[]
+  eventosPersonales EventoPersonal[]
 
   @@map("cursos")
 }
@@ -105,7 +107,7 @@ model Asistencia {
   idAsistencia  Int      @id @default(autoincrement()) @map("id_asistencia")
   idCurso       Int      @map("id_curso")
   idCursoAlumno Int      @map("id_curso_alumno")
-  fecha         DateTime @db.Date @map("fecha")
+  fecha         DateTime @map("fecha") @db.Date
   estado        String   @map("estado")
 
   curso       Curso       @relation(fields: [idCurso], references: [idCurso])
@@ -118,10 +120,26 @@ model Horario {
   idHorario  Int      @id @default(autoincrement()) @map("id_horario")
   idCurso    Int      @map("id_curso")
   dia        String   @map("dia")
-  horaInicio DateTime @db.Time() @map("hora_inicio")
-  horaFin    DateTime @db.Time() @map("hora_fin")
+  horaInicio DateTime @map("hora_inicio") @db.Time()
+  horaFin    DateTime @map("hora_fin") @db.Time()
 
   curso Curso @relation(fields: [idCurso], references: [idCurso])
 
   @@map("horarios")
+}
+model EventoPersonal {
+  idEvento     Int      @id @default(autoincrement()) @map("id_evento")
+  titulo       String   @map("titulo")
+  tipo         String   @map("tipo")
+  fecha        DateTime @db.Date @map("fecha")
+  horaInicio   String?  @map("hora_inicio")
+  horaFin      String?  @map("hora_fin")
+  notas        String?  @map("notas")
+  legajoAlumno Int      @map("legajo_alumno")
+  idCurso      Int?     @map("id_curso")
+
+  alumno Alumno @relation(fields: [legajoAlumno], references: [legajoAlumno], onDelete: Cascade)
+  curso  Curso? @relation(fields: [idCurso], references: [idCurso], onDelete: SetNull)
+
+  @@map("eventos_personales")
 }
