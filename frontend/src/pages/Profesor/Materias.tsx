@@ -14,7 +14,6 @@ import {
   Row,
   Col,
   Input,
-  message,
   Drawer,
   Spin,
   Alert,
@@ -59,7 +58,6 @@ export default function Materias() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [intento, setIntento] = useState(0);
-  const [messageApi, contextHolder] = message.useMessage();
 
   const nombreCompleto = usuario
     ? `${usuario.nombre} ${usuario.apellido}`
@@ -163,11 +161,7 @@ const menuUsuario = {
         onClick={({ key }) => {
           setMenuAbierto(false);
           const ruta = rutasMenu[key];
-          if (ruta) {
-            navigate(ruta);
-            return;
-          }
-          messageApi.info("Esta función estará disponible próximamente.");
+          if (ruta) navigate(ruta);
         }}
         className="materias-menu"
       />
@@ -217,7 +211,6 @@ const menuUsuario = {
         },
       }}
     >
-      {contextHolder}
       <Layout className="materias-layout">
         <Sider
           width={238}
