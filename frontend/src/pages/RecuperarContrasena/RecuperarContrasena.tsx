@@ -4,6 +4,7 @@ import { Alert, Button, Divider, Form, Input, Typography } from 'antd'
 import { MailOutlined } from '@ant-design/icons'
 import AuthLayout from '../../components/AuthLayout/AuthLayout'
 import { ROUTES } from '../../constants/routes'
+import { AuthError, solicitarRecuperacion } from '../../services/auth'
 import styles from './RecuperarContrasena.module.css'
 
 const { Paragraph } = Typography
@@ -13,10 +14,21 @@ interface RecuperarFormValues {
 }
 
 function RecuperarContrasena() {
-  const [enviado, setEnviado] = useState(false)
+  const [enviando, setEnviando] = useState(false)
+  const [mensajeEnviado, setMensajeEnviado] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  const handleFinish = () => {
-    setEnviado(true)
+  const handleFinish = async ({ email }: RecuperarFormValues) => {
+    setEnviando(true)
+    setError(null)
+    setMensajeEnviado(null)
+    try {
+      setMensajeEnviado(await solicitarRecuperacion(email))
+    } catch (err) {
+      setError(err instanceof AuthError ? err.message : 'No pudimos enviar el mail. Intentá de nuevo más tarde.')
+    } finally {
+      setEnviando(false)
+    }
   }
 
   return (
@@ -24,12 +36,23 @@ function RecuperarContrasena() {
       title="Recuperar contraseña"
       subtitle="Ingresá el email con el que creaste tu cuenta"
     >
-      {enviado && (
+      {mensajeEnviado && (
         <Alert
-          type="info"
+          type="success"
           showIcon
-          title="El envío por mail todavía no está activo"
-          description="Mientras tanto, pedile a quien administra AulaActiva en tu institución que te ayude a restablecer la contraseña."
+          title="Revisá tu correo"
+          description={`${mensajeEnviado}. El link vence en 30 minutos; si no lo ves, buscalo en spam.`}
+          className={styles.alert}
+        />
+      )}
+
+      {error && (
+        <Alert
+          type="error"
+          showIcon
+          title={error}
+          closable
+          onClose={() => setError(null)}
           className={styles.alert}
         />
       )}
@@ -37,8 +60,12 @@ function RecuperarContrasena() {
       <Form<RecuperarFormValues>
         layout="vertical"
         onFinish={handleFinish}
-        onValuesChange={() => setEnviado(false)}
+        onValuesChange={() => {
+          setMensajeEnviado(null)
+          setError(null)
+        }}
         requiredMark={false}
+        disabled={enviando}
       >
         <Form.Item
           name="email"
@@ -62,6 +89,7 @@ function RecuperarContrasena() {
             htmlType="submit"
             block
             size="large"
+            loading={enviando}
             className={styles.submitButton}
           >
             Enviar instrucciones

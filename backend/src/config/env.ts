@@ -5,6 +5,9 @@ export const env = {
   databaseUrl: process.env.DATABASE_URL ?? '',
   nodeEnv: process.env.NODE_ENV ?? 'development',
   jwtSecret: process.env.JWT_SECRET ?? '',
+  mailUsuario: process.env.MAIL_USUARIO ?? '',
+  mailContrasena: (process.env.MAIL_CONTRASENA ?? '').replace(/\s/g, ''),
+  frontendUrl: (process.env.FRONTEND_URL ?? 'http://localhost:5173').replace(/\/+$/, ''),
 }
 
 if (!env.jwtSecret) {
