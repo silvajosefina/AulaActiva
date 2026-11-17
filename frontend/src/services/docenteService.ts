@@ -109,3 +109,21 @@ export const getAlumnosDocente = async (): Promise<AlumnoDocente[]> => {
   const response = await axios.get(`${API_URL}/docente/alumnos`, getAuthHeaders());
   return response.data.alumnos;
 };
+
+export interface MateriaDocente {
+  idMateria: number;
+  nombre: string;
+  carrera: string;
+  cursos: {
+    idCurso: number;
+    anio: number;
+    comision: string;
+    periodo: string;
+  }[];
+  horasSemanales: number;
+}
+
+export const getMateriasDocente = async (): Promise<MateriaDocente[]> => {
+  const response = await axios.get(`${API_URL}/docente/materias`, getAuthHeaders());
+  return response.data.materias;
+};
