@@ -162,3 +162,30 @@ export async function listarAsistenciasDelAlumno(
     estado: asistencia.estado as EstadoAsistenciaAlumno,
   }))
 }
+
+export interface PerfilAlumnoDTO {
+  nombre: string
+  apellido: string
+  email: string
+  usuario: string
+  rol: string
+  legajo: number
+}
+
+export async function obtenerPerfilDelAlumno(idUsuario: number): Promise<PerfilAlumnoDTO> {
+  const alumno = await prisma.alumno.findUnique({
+    where: { idUsuario },
+    include: { usuario: true },
+  })
+
+  if (!alumno) throw new AlumnoNoEncontradoError()
+
+  return {
+    nombre: alumno.usuario.nombre,
+    apellido: alumno.usuario.apellido,
+    email: alumno.usuario.email,
+    usuario: alumno.usuario.usuario,
+    rol: alumno.usuario.rol,
+    legajo: alumno.legajoAlumno,
+  }
+}

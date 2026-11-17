@@ -66,3 +66,22 @@ export async function obtenerAsistenciasAlumno(): Promise<AsistenciaAlumno[]> {
 
   return data.asistencias
 }
+
+export interface PerfilAlumno {
+  nombre: string
+  apellido: string
+  email: string
+  usuario: string
+  rol: string
+  legajo: number
+}
+
+export async function obtenerPerfilAlumno(): Promise<PerfilAlumno> {
+  const { data } = await api.get<PerfilAlumno>('/alumno/perfil')
+
+  return data
+}
+
+export async function actualizarContrasenaAlumno(actual: string, nueva: string): Promise<void> {
+  await api.put('/alumno/perfil/password', { actual, nueva })
+}

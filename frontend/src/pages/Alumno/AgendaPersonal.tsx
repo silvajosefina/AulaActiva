@@ -19,14 +19,12 @@ import {
   message,
 } from 'antd'
 import {
-  ArrowLeftOutlined,
   ClockCircleOutlined,
   PlusOutlined,
   DeleteOutlined,
 } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
-import { useNavigate } from 'react-router-dom'
-import { ROUTES } from '../../constants/routes'
+import EncabezadoAlumno from '../../components/EncabezadoAlumno/EncabezadoAlumno'
 import {
   obtenerEventosPersonales,
   crearEventoPersonal,
@@ -79,8 +77,6 @@ function formatearFecha(fecha: string): string {
 }
 
 function AgendaPersonal() {
-  const navigate = useNavigate()
-
   const [eventos, setEventos] = useState<EventoPersonal[]>([])
   const [cargando, setCargando] = useState(true)
   const [guardando, setGuardando] = useState(false)
@@ -288,74 +284,68 @@ function AgendaPersonal() {
   }
 
   return (
-    <main className={styles.contenedor}>
-      <Button
-        type="link"
-        icon={<ArrowLeftOutlined />}
-        onClick={() => navigate(ROUTES.ALUMNO)}
-      >
-        Volver a mi espacio
-      </Button>
+    <>
+      <EncabezadoAlumno />
+      <main className={styles.contenedor}>
+        <section className={styles.introduccion}>
+          <Text className={styles.etiqueta}>
+            SOLO VOS VES TUS EVENTOS
+          </Text>
 
-      <section className={styles.introduccion}>
-        <Text className={styles.etiqueta}>
-          SOLO VOS VES TUS EVENTOS
-        </Text>
+          <Title level={1}>Mi Agenda Personal</Title>
 
-        <Title level={1}>Mi Agenda Personal</Title>
+          <Paragraph>
+            Organizá parciales, entregas, reuniones y recordatorios
+            en un solo lugar.
+          </Paragraph>
 
-        <Paragraph>
-          Organizá parciales, entregas, reuniones y recordatorios
-          en un solo lugar.
-        </Paragraph>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            className={styles.botonNuevo}
+            onClick={abrirNuevoCompromiso}
+            disabled={cargando}
+          >
+            Nuevo compromiso
+          </Button>
+        </section>
 
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          className={styles.botonNuevo}
-          onClick={abrirNuevoCompromiso}
-          disabled={cargando}
-        >
-          Nuevo compromiso
-        </Button>
-      </section>
+        <Spin spinning={cargando}>
+          <Card className={styles.calendario} variant="borderless">
+            <Calendar
+              value={mesVisible}
+              onChange={(fecha) => setMesVisible(fecha)}
+              onSelect={(fecha) => {
+                setFechaSeleccionada(fecha)
+                setMesVisible(fecha)
+              }}
+              cellRender={(fecha) => {
+                const eventosDeLaFecha = eventos.filter(
+                  (evento) =>
+                    evento.fecha === fecha.format('YYYY-MM-DD'),
+                )
 
-      <Spin spinning={cargando}>
-        <Card className={styles.calendario} variant="borderless">
-          <Calendar
-            value={mesVisible}
-            onChange={(fecha) => setMesVisible(fecha)}
-            onSelect={(fecha) => {
-              setFechaSeleccionada(fecha)
-              setMesVisible(fecha)
-            }}
-            cellRender={(fecha) => {
-              const eventosDeLaFecha = eventos.filter(
-                (evento) =>
-                  evento.fecha === fecha.format('YYYY-MM-DD'),
-              )
+                return (
+                  <>
+                    {eventosDeLaFecha.slice(0, 2).map((evento) => (
+                      <Tag
+                        key={evento.id}
+                        className={styles.etiquetaEvento}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setFechaSeleccionada(fecha)
+                          abrirEdicion(evento)
+                        }}
+                      >
+                        {evento.titulo}
+                      </Tag>
+                    ))}
 
-              return (
-                <>
-                  {eventosDeLaFecha.slice(0, 2).map((evento) => (
-                    <Tag
-                      key={evento.id}
-                      className={styles.etiquetaEvento}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setFechaSeleccionada(fecha)
-                        abrirEdicion(evento)
-                      }}
-                    >
-                      {evento.titulo}
-                    </Tag>
-                  ))}
-
-                  {eventosDeLaFecha.length > 2 && (
-                    <Text type="secondary">
-                      +{eventosDeLaFecha.length - 2} más
-                    </Text>
-                  )}
+                    {eventosDeLaFecha.length > 2 && (
+                      <Text type="secondary">
+                        +{eventosDeLaFecha.length - 2} más
+                      </Text>
+                    )}
                 </>
               )
             }}
@@ -542,6 +532,7 @@ function AgendaPersonal() {
         </Form>
       </Modal>
     </main>
+    </>
   )
 }
 

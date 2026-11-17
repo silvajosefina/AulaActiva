@@ -5,7 +5,10 @@ import {
   AlumnoNoEncontradoError,
   listarAsistenciasDelAlumno,
   listarCursosDelAlumno,
+  obtenerPerfilDelAlumno,
 } from '../services/alumno.service'
+
+import { cambiarContrasena, ContrasenaActualIncorrectaError } from '../services/auth.service'
 
 import {
   AlumnoNoEncontradoError as AgendaAlumnoNoEncontradoError,
@@ -161,6 +164,43 @@ export async function eliminarEventoPersonalController(
 
     res.status(204).send()
   } catch (err) {
+    responderError(res, err)
+  }
+}
+
+export async function perfilAlumnoController(req: Request, res: Response) {
+  try {
+    const perfil = await obtenerPerfilDelAlumno(req.usuario!.idUsuario)
+    res.status(200).json(perfil)
+  } catch (err) {
+    responderError(res, err)
+  }
+}
+
+export async function actualizarPasswordAlumnoController(req: Request, res: Response) {
+  const { actual, nueva } = (req.body ?? {}) as { actual?: unknown; nueva?: unknown }
+
+  if (typeof actual !== 'string' || typeof nueva !== 'string' || !actual || !nueva) {
+    res.status(400).json({ message: 'La contraseña actual y la nueva son obligatorias' })
+    return
+  }
+  if (nueva.length < 6) {
+    res.status(400).json({ message: 'La nueva contraseña debe tener al menos 6 caracteres' })
+    return
+  }
+  if (nueva === actual) {
+    res.status(400).json({ message: 'La nueva contraseña tiene que ser distinta de la actual' })
+    return
+  }
+
+  try {
+    await cambiarContrasena(req.usuario!.idUsuario, actual, nueva)
+    res.status(200).json({ message: 'Contraseña actualizada con éxito' })
+  } catch (err) {
+    if (err instanceof ContrasenaActualIncorrectaError) {
+      res.status(400).json({ message: 'La contraseña actual es incorrecta' })
+      return
+    }
     responderError(res, err)
   }
 }

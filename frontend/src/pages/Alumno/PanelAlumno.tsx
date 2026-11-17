@@ -239,6 +239,14 @@ function PanelAlumno() {
 
             <button
               type="button"
+              className={styles.botonPerfil}
+              onClick={() => navigate(ROUTES.ALUMNO_PERFIL)}
+            >
+              Mi perfil
+            </button>
+
+            <button
+              type="button"
               className={styles.botonSalir}
               onClick={cerrarSesion}
             >

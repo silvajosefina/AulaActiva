@@ -8,6 +8,8 @@ import {
   crearEventoPersonalController,
   actualizarEventoPersonalController,
   eliminarEventoPersonalController,
+  perfilAlumnoController,
+  actualizarPasswordAlumnoController,
 } from '../controllers/alumno.controller'
 
 import {
@@ -25,6 +27,9 @@ router.get('/cursos', cursosAlumnoController)
 
 // Asistencias del alumno autenticado.
 router.get('/asistencias', asistenciasAlumnoController)
+
+router.get('/perfil', perfilAlumnoController)
+router.put('/perfil/password', actualizarPasswordAlumnoController)
 
 // Agenda personal del alumno autenticado.
 router.get('/agenda-personal', listarEventosPersonalesController)

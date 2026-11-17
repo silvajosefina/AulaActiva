@@ -13,6 +13,7 @@ import PanelAlumno from '../pages/Alumno/PanelAlumno'
 import MisAsistencias from '../pages/Alumno/MisAsistencias'
 import MisCursosAlumno from '../pages/Alumno/MisCursos'
 import AgendaPersonal from '../pages/Alumno/AgendaPersonal'
+import PerfilAlumno from '../pages/Alumno/PerfilAlumno'
 import ProtectedRoute from './ProtectedRoute'
 import { ROUTES } from '../constants/routes'
 
@@ -107,6 +108,14 @@ function AppRouter() {
         element={
           <ProtectedRoute rolRequerido="ALUMNO">
             <AgendaPersonal />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path={ROUTES.ALUMNO_PERFIL}
+        element={
+          <ProtectedRoute rolRequerido="ALUMNO">
+            <PerfilAlumno />
           </ProtectedRoute>
         }
       />
