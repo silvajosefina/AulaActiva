@@ -13,7 +13,6 @@ import {
   Row,
   Col,
   Table,
-  message,
   Drawer,
   Alert,
 } from "antd";
@@ -65,7 +64,6 @@ export default function InicioProfesor() {
   const usuario = getSessionUser();
   const [menuAbierto, setMenuAbierto] = useState(false);
 
-  const [messageApi, contextHolder] = message.useMessage();
   const [inicio, setInicio] = useState<InicioDocente | null>(null);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -243,11 +241,7 @@ const menuUsuario = {
         onClick={({ key }) => {
           setMenuAbierto(false);
           const ruta = rutasMenu[key];
-          if (ruta) {
-            navigate(ruta);
-            return;
-          }
-          messageApi.info("Esta función estará disponible próximamente.");
+          if (ruta) navigate(ruta);
         }}
         className="inicio-menu"
       />
@@ -302,7 +296,6 @@ const menuUsuario = {
         },
       }}
     >
-      {contextHolder}
       <Layout className="inicio-layout">
         <Sider
           width={238}

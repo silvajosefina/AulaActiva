@@ -142,11 +142,7 @@ export default function MisCursos() {
         onClick={({ key }) => {
           setMenuAbierto(false);
           const ruta = rutasMenu[key];
-          if (ruta) {
-            navigate(ruta);
-            return;
-          }
-          messageApi.info("Esta función estará disponible próximamente.");
+          if (ruta) navigate(ruta);
         }}
         className="cursos-menu"
       />
