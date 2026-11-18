@@ -7,7 +7,7 @@ import { enviarMailRecuperacion, verificarMailDisponible } from './mail.service'
 
 export class InvalidCredentialsError extends Error {}
 export class DuplicateUserError extends Error {}
-export class RolIncorrectoError extends Error {}
+export class PerfilSinRolError extends Error {}
 export class ContrasenaActualIncorrectaError extends Error {}
 export class TokenRecuperacionInvalidoError extends Error {}
 export class TokenRecuperacionVencidoError extends Error {}
@@ -69,7 +69,7 @@ function toDTO(usuarioDb: UsuarioConPerfil): AuthUserDTO {
   }
 }
 
-export async function login(usuario: string, contrasena: string, rol: Rol): Promise<LoginResult> {
+export async function login(usuario: string, contrasena: string): Promise<LoginResult> {
   const usuarioDb = await prisma.usuario.findUnique({
     where: { usuario },
     include: { docente: true, alumno: true },
@@ -79,10 +79,8 @@ export async function login(usuario: string, contrasena: string, rol: Rol): Prom
     throw new InvalidCredentialsError()
   }
 
-  if (!tienePerfilDeRol(usuarioDb, rol)) {
-    throw new RolIncorrectoError(
-      rol === 'DOCENTE' ? 'Esta cuenta no pertenece a un docente' : 'Esta cuenta no pertenece a un alumno',
-    )
+  if (!tienePerfilDeRol(usuarioDb, usuarioDb.rol)) {
+    throw new PerfilSinRolError()
   }
 
   const token = jwt.sign({ sub: usuarioDb.idUsuario, rol: usuarioDb.rol }, env.jwtSecret, {

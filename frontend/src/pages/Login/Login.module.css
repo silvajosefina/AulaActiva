@@ -2,16 +2,6 @@
   color: #bc9150;
 }
 
-.roleGroup {
-  display: flex;
-  width: 100%;
-}
-
-.roleButton {
-  flex: 1;
-  text-align: center;
-}
-
 .alert {
   margin-bottom: 24px;
 }

@@ -5,7 +5,7 @@ import {
   login,
   register,
   restablecerContrasena,
-  RolIncorrectoError,
+  PerfilSinRolError,
   solicitarRecuperacion,
   TokenRecuperacionInvalidoError,
   TokenRecuperacionVencidoError,
@@ -15,27 +15,25 @@ import { MailNoConfiguradoError } from '../services/mail.service'
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export async function loginController(req: Request, res: Response) {
-  const { usuario, contrasena, rol } = (req.body ?? {}) as { usuario?: unknown; contrasena?: unknown; rol?: unknown }
+  const { usuario, contrasena } = (req.body ?? {}) as { usuario?: unknown; contrasena?: unknown }
 
   if (typeof usuario !== 'string' || typeof contrasena !== 'string' || !usuario || !contrasena) {
     res.status(400).json({ message: 'Usuario y contraseña son requeridos' })
     return
   }
-  if (rol !== 'DOCENTE' && rol !== 'ALUMNO') {
-    res.status(400).json({ message: 'Elegí si ingresás como Docente o Alumno' })
-    return
-  }
 
   try {
-    const resultado = await login(usuario, contrasena, rol)
+    const resultado = await login(usuario, contrasena)
     res.status(200).json(resultado)
   } catch (err) {
     if (err instanceof InvalidCredentialsError) {
       res.status(401).json({ message: 'Usuario o contraseña incorrectos' })
       return
     }
-    if (err instanceof RolIncorrectoError) {
-      res.status(403).json({ message: err.message })
+    if (err instanceof PerfilSinRolError) {
+      res.status(403).json({
+        message: 'Tu cuenta no tiene un perfil de docente o alumno asociado. Consultá con quien administra AulaActiva',
+      })
       return
     }
     console.error(err)
