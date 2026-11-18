@@ -1,16 +1,15 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Alert, Button, Checkbox, Divider, Form, Input, Radio, Typography } from 'antd'
+import { Alert, Button, Checkbox, Divider, Form, Input, Typography } from 'antd'
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import AuthLayout from '../../components/AuthLayout/AuthLayout'
-import { AuthError, login, saveSession, type RolUsuario } from '../../services/auth'
+import { AuthError, login, saveSession } from '../../services/auth'
 import { ROUTES } from '../../constants/routes'
 import styles from './Login.module.css'
 
 const { Link, Paragraph } = Typography
 
 interface LoginFormValues {
-  rol: RolUsuario
   usuario: string
   contrasena: string
   recordarme: boolean
@@ -29,7 +28,7 @@ function Login() {
     setError(null)
     setLoading(true)
     try {
-      const { token, usuario } = await login(values.usuario, values.contrasena, values.rol)
+      const { token, usuario } = await login(values.usuario, values.contrasena)
       
       saveSession(token, usuario, values.recordarme)
 
@@ -94,21 +93,6 @@ function Login() {
         disabled={loading}
         initialValues={{ recordarme: false }}
       >
-        <Form.Item
-          name="rol"
-          label="Ingresás como"
-          rules={[{ required: true, message: 'Elegí si ingresás como Alumno o Docente' }]}
-        >
-          <Radio.Group size="large" buttonStyle="solid" className={styles.roleGroup}>
-            <Radio.Button value="ALUMNO" className={styles.roleButton}>
-              Alumno
-            </Radio.Button>
-            <Radio.Button value="DOCENTE" className={styles.roleButton}>
-              Docente
-            </Radio.Button>
-          </Radio.Group>
-        </Form.Item>
-
         <Form.Item
           name="usuario"
           label="Usuario"

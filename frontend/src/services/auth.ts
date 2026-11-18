@@ -34,9 +34,9 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:4000',
 })
 
-export async function login(usuario: string, contrasena: string, rol: RolUsuario): Promise<LoginResult> {
+export async function login(usuario: string, contrasena: string): Promise<LoginResult> {
   try {
-    const { data } = await api.post<LoginResult>('/auth/login', { usuario, contrasena, rol })
+    const { data } = await api.post<LoginResult>('/auth/login', { usuario, contrasena })
     return data
   } catch (err) {
     if (axios.isAxiosError<{ message?: string }>(err)) {
