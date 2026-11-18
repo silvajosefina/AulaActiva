@@ -8,6 +8,7 @@ import {
   RolIncorrectoError,
   solicitarRecuperacion,
   TokenRecuperacionInvalidoError,
+  TokenRecuperacionVencidoError,
 } from '../services/auth.service'
 import { MailNoConfiguradoError } from '../services/mail.service'
 
@@ -130,8 +131,15 @@ export async function restablecerContrasenaController(req: Request, res: Respons
     await restablecerContrasena(token, nueva)
     res.status(200).json({ message: 'Tu contraseña se actualizó correctamente' })
   } catch (err) {
+    if (err instanceof TokenRecuperacionVencidoError) {
+      res.status(400).json({ message: 'El link venció: dura 30 minutos. Pedí uno nuevo' })
+      return
+    }
     if (err instanceof TokenRecuperacionInvalidoError) {
-      res.status(400).json({ message: 'El link venció o ya fue usado. Pedí uno nuevo' })
+      res.status(400).json({
+        message:
+          'Este link ya se usó o no es válido. Si ya cambiaste tu contraseña, iniciá sesión con la nueva; si no, pedí un link nuevo',
+      })
       return
     }
     console.error(err)
