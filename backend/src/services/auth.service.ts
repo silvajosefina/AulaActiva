@@ -10,6 +10,7 @@ export class DuplicateUserError extends Error {}
 export class RolIncorrectoError extends Error {}
 export class ContrasenaActualIncorrectaError extends Error {}
 export class TokenRecuperacionInvalidoError extends Error {}
+export class TokenRecuperacionVencidoError extends Error {}
 
 type Rol = 'DOCENTE' | 'ALUMNO'
 
@@ -158,7 +159,10 @@ export async function solicitarRecuperacion(email: string): Promise<void> {
     select: { idUsuario: true, nombre: true, email: true, contrasena: true },
   })
 
-  if (!usuarioDb) return
+  if (!usuarioDb) {
+    console.log('[AulaActiva] Pedido de recuperación para un email que no está registrado')
+    return
+  }
 
   const token = jwt.sign(
     { sub: String(usuarioDb.idUsuario), tipo: TIPO_TOKEN_RECUPERACION },
@@ -167,9 +171,13 @@ export async function solicitarRecuperacion(email: string): Promise<void> {
   )
 
   const link = `${env.frontendUrl}/restablecer-contrasena?token=${encodeURIComponent(token)}`
-  enviarMailRecuperacion(usuarioDb.email, usuarioDb.nombre, link).catch((err) => {
-    console.error('No se pudo enviar el mail de recuperación', err)
-  })
+  enviarMailRecuperacion(usuarioDb.email, usuarioDb.nombre, link)
+    .then((enviado) => {
+      if (enviado) console.log(`[AulaActiva] Mail de recuperación enviado a ${usuarioDb.email}`)
+    })
+    .catch((err) => {
+      console.error(`[AulaActiva] No se pudo enviar el mail de recuperación a ${usuarioDb.email}`, err)
+    })
 }
 
 export async function restablecerContrasena(token: string, nueva: string): Promise<void> {
@@ -183,12 +191,14 @@ export async function restablecerContrasena(token: string, nueva: string): Promi
   })
   if (!usuarioDb) throw new TokenRecuperacionInvalidoError()
 
+  let payload: string | jwt.JwtPayload
   try {
-    const payload = jwt.verify(token, claveDeRecuperacion(usuarioDb.contrasena))
-    if (typeof payload === 'string' || payload.tipo !== TIPO_TOKEN_RECUPERACION) {
-      throw new TokenRecuperacionInvalidoError()
-    }
-  } catch {
+    payload = jwt.verify(token, claveDeRecuperacion(usuarioDb.contrasena))
+  } catch (err) {
+    if (err instanceof jwt.TokenExpiredError) throw new TokenRecuperacionVencidoError()
+    throw new TokenRecuperacionInvalidoError()
+  }
+  if (typeof payload === 'string' || payload.tipo !== TIPO_TOKEN_RECUPERACION) {
     throw new TokenRecuperacionInvalidoError()
   }
 

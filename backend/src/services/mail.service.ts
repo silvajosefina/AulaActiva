@@ -24,11 +24,22 @@ function escaparHtml(texto: string): string {
     .replace(/"/g, '&quot;')
 }
 
-export async function enviarMailRecuperacion(destino: string, nombre: string, link: string): Promise<void> {
+function horaArgentina(): string {
+  return new Intl.DateTimeFormat('es-AR', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).format(new Date())
+}
+
+export async function enviarMailRecuperacion(destino: string, nombre: string, link: string): Promise<boolean> {
   verificarMailDisponible()
   if (!transporte) {
     console.log(`[AulaActiva] Mail de recuperación no configurado. Link para ${destino}: ${link}`)
-    return
+    return false
   }
 
   const nombreSeguro = escaparHtml(nombre)
@@ -36,7 +47,7 @@ export async function enviarMailRecuperacion(destino: string, nombre: string, li
   await transporte.sendMail({
     from: `"AulaActiva" <${env.mailUsuario}>`,
     to: destino,
-    subject: 'Restablecé tu contraseña de AulaActiva',
+    subject: `Restablecé tu contraseña de AulaActiva (pedido del ${horaArgentina()})`,
     text: [
       `Hola ${nombre}:`,
       '',
@@ -60,4 +71,6 @@ export async function enviarMailRecuperacion(destino: string, nombre: string, li
       </div>
     `,
   })
+
+  return true
 }
