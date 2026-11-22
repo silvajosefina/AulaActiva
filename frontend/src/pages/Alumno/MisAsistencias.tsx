@@ -11,9 +11,7 @@ import {
   Typography,
 } from 'antd'
 import type { TableColumnsType } from 'antd'
-import {
-  CalendarOutlined,
-} from '@ant-design/icons'
+import { CalendarOutlined } from '@ant-design/icons'
 import EncabezadoAlumno from '../../components/EncabezadoAlumno/EncabezadoAlumno'
 import styles from './MisAsistencias.module.css'
 import {
@@ -347,7 +345,7 @@ function MisAsistencias() {
 
             {cargando ? (
               <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                <Spin tip="Cargando tus asistencias..." />
+                <Spin description="Cargando tus asistencias..." />
               </div>
             ) : (
               <>

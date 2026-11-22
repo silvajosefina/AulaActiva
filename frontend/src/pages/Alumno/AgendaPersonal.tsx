@@ -410,7 +410,7 @@ function AgendaPersonal() {
         cancelText="Cancelar"
         confirmLoading={guardando}
         closable={!guardando}
-        maskClosable={!guardando}
+        mask={{ closable: !guardando }}
         className={styles.modalAgenda}
         footer={[
           ...(eventoEditado
